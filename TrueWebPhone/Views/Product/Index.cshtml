@@ -1,0 +1,47 @@
+﻿@model IEnumerable<TrueWebPhone.Models.Product>
+
+@{
+    ViewData["Title"] = "Product Manager";
+}
+
+<div class="container mt-4">
+    <h1>Product Management Page</h1>
+
+    <p>
+        <a class="btn btn-primary" asp-action="Create">Create New</a>
+    </p>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.ProductName)</th>
+                <th>@Html.DisplayNameFor(model => model.Barcode)</th>
+                <th>@Html.DisplayNameFor(model => model.ImportPrice)</th>
+                <th>@Html.DisplayNameFor(model => model.RetailPrice)</th>
+                <th>@Html.DisplayNameFor(model => model.Category)</th>
+                <th>CreationDate</th>
+                <th>CreationTime</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.ProductName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Barcode)</td>
+                    <td>@Html.DisplayFor(modelItem => item.ImportPrice)</td>
+                    <td>@Html.DisplayFor(modelItem => item.RetailPrice)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Category)</td>
+                    <td>@item.CreationDate.ToString("yyyy-MM-dd")</td>
+                    <td>@item.CreationDate.ToString("HH:mm:ss")</td>
+                    <td>
+                        <a class="btn btn-info btn-sm" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a class="btn btn-success btn-sm" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

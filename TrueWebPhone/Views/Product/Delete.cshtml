@@ -1,0 +1,41 @@
+﻿@model TrueWebPhone.Models.Product
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<div class="container mt-4">
+    <h1 class="display-4">Delete Product</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">Are you sure you want to delete this product?</h3>
+
+            <dl class="row">
+                <dt class="col-sm-3">Product Name:</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductName)</dd>
+
+                <dt class="col-sm-3">Barcode:</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Barcode)</dd>
+
+                <dt class="col-sm-3">Import Price:</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.ImportPrice)</dd>
+
+                <dt class="col-sm-3">Retail Price:</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.RetailPrice)</dd>
+
+                <dt class="col-sm-3">Category:</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Category)</dd>
+
+                <dt class="col-sm-3">Creation Date:</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.CreationDate)</dd>
+            </dl>
+
+            <form asp-action="DeleteConfirmed" method="post" class="mt-4">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <a asp-action="Index" class="btn btn-secondary ml-2">Back to List</a>
+            </form>
+        </div>
+    </div>
+</div>

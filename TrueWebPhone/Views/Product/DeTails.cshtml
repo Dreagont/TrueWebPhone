@@ -1,0 +1,42 @@
+﻿@model TrueWebPhone.Models.Product
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center">Product Details</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <dl class="row">
+                <dt class="col-sm-4">Product Name</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.ProductName)</dd>
+
+                <dt class="col-sm-4">Barcode</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Barcode)</dd>
+
+                <dt class="col-sm-4">Import Price</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.ImportPrice)</dd>
+
+                <dt class="col-sm-4">Retail Price</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.RetailPrice)</dd>
+
+                <dt class="col-sm-4">Category</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Category)</dd>
+
+                <dt class="col-sm-4">CreationDate</dt>
+                <dd class="col-sm-8">@Model.CreationDate.ToString("yyyy-MM-dd")</dd>
+
+                <dt class="col-sm-4">CreationTime</dt>
+                <dd class="col-sm-8">@Model.CreationDate.ToString("HH:mm:ss")</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-3 text-center">
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a> |
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
