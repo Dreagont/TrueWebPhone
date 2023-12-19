@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+﻿using System.Net.Mail;
+using System.Net;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -52,15 +54,16 @@ public class AccountController : Controller
             if (ct.Accounts.Any(a => a.Username == "admin"))
             {
                 await SaveLogin(account.Username, account.Password);
-            } else
+            }
+            else
             {
                 await RegisterAdmin("admin@gmail.com", "admin");
                 await SaveLogin(account.Username, account.Password);
-
             }
-        } else
+        }
+        else
         {
-            await validateLogin(account.Username,account.Password);
+            await validateLogin(account.Username, account.Password);
         }
 
         return View();
@@ -68,9 +71,9 @@ public class AccountController : Controller
 
     private async Task validateLogin(string username, string password)
     {
-        var account = await ct.Accounts.SingleOrDefaultAsync(a => a.Username == username && a.Password == password);
+        var account = await ct.Accounts.SingleOrDefaultAsync(a => a.Username == username);
 
-        if (account != null)
+        if (account != null && BCrypt.Net.BCrypt.Verify(password, account.Password))
         {
             await SaveLogin(username, password);
         }
@@ -89,12 +92,14 @@ public class AccountController : Controller
         }
 
         string username = email.Substring(0, email.IndexOf('@'));
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword("123456");
+
 
         var newAccount = new Account
         {
             Email = email,
             Username = username,
-            Password = "123456",
+            Password = passwordHash,
             Image = "default.jpg",
             Role = "Admin",
             Status = "Active",
@@ -225,14 +230,20 @@ public class AccountController : Controller
             ModelState.AddModelError("Email", "Invalid email address");
             return View();
         }
+        if (ct.Accounts.Any(a => a.Email == email))
+        {
+            ModelState.AddModelError("Email", "Email already exists");
+            return View();
+        }
 
         string username = email.Substring(0, email.IndexOf('@'));
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(username);
 
         var newAccount = new Account
         {
             Email = email,
             Username = username,
-            Password = username,
+            Password = passwordHash,
             Image = "default.jpg",
             Role = "Seller",
             Status = "InActive",
@@ -242,8 +253,63 @@ public class AccountController : Controller
         ct.Accounts.Add(newAccount);
         await ct.SaveChangesAsync();
 
+        var activationLink = Url.Action("ActivateAccount", "Account", new { id = newAccount.Id}, Request.Scheme);
+
+        await SendEmailAsync(email, "Confirm Account", activationLink);
+
+
         return RedirectToAction("Index");
     }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> ActivateAccount(int id)
+    {
+        var account = await ct.Accounts.FindAsync(id);
+
+        if (account == null)
+        {
+            return View("InvalidActivationLink");
+        }
+
+        // Activate the account
+        account.Status = "Active";
+        await ct.SaveChangesAsync();
+
+        return RedirectToAction("Login");
+    }
+
+    private async Task<bool> SendEmailAsync(string email, string subject, string confirmlink)
+    {
+        try
+        {
+            MailMessage message = new MailMessage();
+            SmtpClient smtp = new SmtpClient();
+            message.From = new MailAddress("vate202@gmail.com");
+            message.To.Add(email);
+            message.Subject = subject;
+            message.Body = $"Click the following link to activate your account: {confirmlink}";
+            message.IsBodyHtml = true;
+
+            smtp.Host = "smtp.gmail.com";
+            smtp.Port = 587;
+
+            smtp.EnableSsl = true;
+            smtp.UseDefaultCredentials = false;
+            smtp.Credentials = new NetworkCredential("vate202@gmail.com", "lktyqjjjbiyefldc");
+            smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+            smtp.Send(message);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
+
+
 
     public IActionResult Forbidden()
     {
