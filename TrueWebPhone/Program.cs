@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TrueWebPhone
 {
@@ -26,6 +29,8 @@ namespace TrueWebPhone
             var app = builder.Build();
 
             app.UseStatusCodePagesWithReExecute("/Error/{0}");
+
+      
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
