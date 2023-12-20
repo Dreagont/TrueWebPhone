@@ -8,22 +8,23 @@ namespace Lab7MVC.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
 
-    public HomeController(ILogger<HomeController> logger)
+    private readonly ApplicationDbContext ct;
+
+    public HomeController(ApplicationDbContext ct)
     {
-        _logger = logger;
+        this.ct = ct;
     }
 
+    
+    
     public IActionResult Index()
     {
         return View();
     }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
@@ -31,7 +32,7 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    [Route("/Error/{code:int}")] // xử lý lỗi 404
+    [Route("/Error/{code:int}")] 
     public IActionResult HandleError(int code)
     {
         ViewData["ErrorMessage"] = $"Error occurred. The ErrorCode is: {code}";

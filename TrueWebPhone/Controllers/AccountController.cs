@@ -34,6 +34,7 @@ public class AccountController : Controller
         return View(accounts);
 
     }
+
     [OnlyUnauthenticated]
     public IActionResult Login()
     {
@@ -309,11 +310,10 @@ public class AccountController : Controller
         }
     }
 
-
-
     public IActionResult Forbidden()
     {
         return View();
     }
+
 
 }
