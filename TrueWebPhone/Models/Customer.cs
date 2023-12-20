@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,6 +8,13 @@ namespace TrueWebPhone.Models
 {
     public class Customer
     {
+        public Customer(string phone, string name, string address)
+        {
+            Phone = phone;
+            Name = name;
+            Address = address;
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
@@ -20,6 +28,6 @@ namespace TrueWebPhone.Models
         [Required]
         public string Address { get; set; }
 
-        public ICollection<Order> Orders { get; set; }
+        public ICollection<Order>? Orders { get; set; }
     }
 }

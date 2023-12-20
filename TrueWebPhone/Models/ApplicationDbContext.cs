@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using TrueWebPhone.Models;
 
 public class ApplicationDbContext : DbContext
@@ -11,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<Customer> Customers { get; set; }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,5 +33,10 @@ public class ApplicationDbContext : DbContext
             .HasOne(po => po.Product)
             .WithMany(p => p.ProductOrders)
             .HasForeignKey(po => po.ProductId);
+
+        modelBuilder.Entity<Customer>()
+                .HasIndex(c => c.Phone)
+                .IsUnique();
+
     }
 }
