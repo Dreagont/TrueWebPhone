@@ -17,5 +17,10 @@ namespace TrueWebPhone.Models
         public decimal RetailPrice { get; set; }
         public string Category { get; set; }
         public DateTime CreationDate { get; set; }
+
+        public Boolean isSelled { get; set; }
+        
+        public ICollection<ProductOrder> ProductOrders { get; set; }
+
     }
 }
