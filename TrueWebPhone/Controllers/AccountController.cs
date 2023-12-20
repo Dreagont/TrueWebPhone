@@ -21,7 +21,7 @@ public class AccountController : Controller
         this.ct = ct;
     }
 
-
+    //vclcvlclvclvlcvc
     [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
