@@ -29,6 +29,9 @@ namespace TrueWebPhone.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Initialize related entities if needed
+                p.ProductOrders = new List<ProductOrder>();
+
                 ct.Products.Add(p);
                 ct.SaveChanges();
                 return RedirectToAction("Index");

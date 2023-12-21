@@ -12,6 +12,11 @@ namespace TrueWebPhone.Models
         [Required]
         public string ProductName { get; set; }
 
+        public Product()
+        {
+            ProductOrders = new List<ProductOrder>();
+        }
+
         public string Barcode { get; set; }
         public decimal ImportPrice { get; set; }
         public decimal RetailPrice { get; set; }
