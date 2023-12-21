@@ -123,6 +123,29 @@ namespace TrueWebPhone.Controllers
             return View(product);
         }
 
+        [HttpGet]
+        public IActionResult Search(string searchString)
+        {
+            var products = ct.Products.ToList();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                decimal price;
+                bool isNumeric = decimal.TryParse(searchString, out price); // Check if the entered search string is a numeric value
+
+                products = products.Where(p =>
+                    p.ProductName.Contains(searchString) ||
+                    p.Barcode.Contains(searchString) ||
+                    p.Category.Contains(searchString) ||
+                    (isNumeric && p.ImportPrice == price) || // Check if ImportPrice matches the entered numeric value
+                    (isNumeric && p.RetailPrice == price)   // Check if RetailPrice matches the entered numeric value
+                                                            // Add additional fields you want to search here
+                ).ToList();
+            }
+
+            return View("Index", products);
+        }
+
     }
 }
 

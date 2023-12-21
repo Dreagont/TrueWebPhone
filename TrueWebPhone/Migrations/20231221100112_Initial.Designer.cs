@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TrueWebPhone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231220050036_Initial2")]
-    partial class Initial2
+    [Migration("20231221100112_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,9 +71,12 @@ namespace TrueWebPhone.Migrations
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Phone")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -159,9 +162,27 @@ namespace TrueWebPhone.Migrations
                     b.Property<decimal>("RetailPrice")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<bool>("isSelled")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("TrueWebPhone.Models.ProductOrder", b =>
+                {
+                    b.Property<string>("OrderId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductOrder");
                 });
 
             modelBuilder.Entity("TrueWebPhone.Models.Order", b =>
@@ -175,9 +196,38 @@ namespace TrueWebPhone.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("TrueWebPhone.Models.ProductOrder", b =>
+                {
+                    b.HasOne("TrueWebPhone.Models.Order", "Order")
+                        .WithMany("ProductOrders")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TrueWebPhone.Models.Product", "Product")
+                        .WithMany("ProductOrders")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("TrueWebPhone.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("TrueWebPhone.Models.Order", b =>
+                {
+                    b.Navigation("ProductOrders");
+                });
+
+            modelBuilder.Entity("TrueWebPhone.Models.Product", b =>
+                {
+                    b.Navigation("ProductOrders");
                 });
 #pragma warning restore 612, 618
         }
