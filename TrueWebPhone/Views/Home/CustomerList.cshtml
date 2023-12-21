@@ -6,9 +6,19 @@
 
 <h1>CustomerList</h1>
 
+<form asp-controller="Customer" asp-action="Search" method="get">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" name="searchString" placeholder="Enter customer information">
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Search Customer</button>
+        </div>
+    </div>
+</form>
+
 <p>
-    <a asp-action="CreateCustomer">Create New</a>
+    <a class="btn btn-primary" asp-action="CreateCustomer">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -25,23 +35,24 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Phone)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Address)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Phone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Address)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
