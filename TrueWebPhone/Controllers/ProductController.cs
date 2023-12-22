@@ -130,13 +130,15 @@ namespace TrueWebPhone.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
+                string searchLower = searchString.ToLower(); // Convert search string to lowercase
+
                 decimal price;
-                bool isNumeric = decimal.TryParse(searchString, out price); // Check if the entered search string is a numeric value
+                bool isNumeric = decimal.TryParse(searchLower, out price); // Check if the entered search string is a numeric value
 
                 products = products.Where(p =>
-                    p.ProductName.Contains(searchString) ||
-                    p.Barcode.Contains(searchString) ||
-                    p.Category.Contains(searchString) ||
+                    p.ProductName.ToLower().Contains(searchLower) ||
+                    p.Barcode.ToLower().Contains(searchLower) ||
+                    p.Category.ToLower().Contains(searchLower) ||
                     (isNumeric && p.ImportPrice == price) || // Check if ImportPrice matches the entered numeric value
                     (isNumeric && p.RetailPrice == price)   // Check if RetailPrice matches the entered numeric value
                                                             // Add additional fields you want to search here

@@ -328,10 +328,10 @@ public class AccountController : Controller
         {
             accounts = accounts.Where(a =>
                 a.Email.Contains(searchString) ||
-                a.Username.Contains(searchString) ||
-                a.Name.Contains(searchString) ||
-                a.Role.Contains(searchString) ||
-                a.Status.Contains(searchString)
+                a.Username.ToLower().Contains(searchString) ||
+                a.Name.ToLower().Contains(searchString) ||
+                a.Role.ToLower().Contains(searchString) ||
+                a.Status.ToLower().Contains(searchString)
             // Add additional fields you want to search here
             ).ToList();
         }

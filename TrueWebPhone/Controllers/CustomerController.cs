@@ -23,9 +23,9 @@ namespace TrueWebPhone.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 customers = customers.Where(c =>
-                    c.Name.Contains(searchString) ||
-                    c.Phone.Contains(searchString) ||
-                    c.Address.Contains(searchString)
+                    c.Name.ToLower().Contains(searchString) ||
+                    c.Phone.ToLower().Contains(searchString) ||
+                    c.Address.ToLower().Contains(searchString)
                 // Add additional fields you want to search here
                 ).ToList();
             }
