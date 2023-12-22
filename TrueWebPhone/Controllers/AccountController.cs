@@ -315,5 +315,27 @@ public class AccountController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult Search(string searchString)
+    {
+        var currentUsername = User.Identity.Name;
 
+        var accounts = ct.Accounts
+            .Where(a => a.Username != currentUsername && a.Role != "Admin")
+            .ToList();
+
+        if (!string.IsNullOrEmpty(searchString))
+        {
+            accounts = accounts.Where(a =>
+                a.Email.Contains(searchString) ||
+                a.Username.Contains(searchString) ||
+                a.Name.Contains(searchString) ||
+                a.Role.Contains(searchString) ||
+                a.Status.Contains(searchString)
+            // Add additional fields you want to search here
+            ).ToList();
+        }
+
+        return View("Index", accounts);
+    }
 }

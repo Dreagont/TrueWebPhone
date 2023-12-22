@@ -20,14 +20,21 @@
                     <ul class="navbar-nav mr-auto">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Index">Account Management</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Product" asp-action="Index">Product Management</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="CustomerList">Customer Management</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Services
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Index">Account Management</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Product" asp-action="Index">Product Management</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="CustomerList">Customer Management</a>
+                                    </li>
+                                </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Sell" asp-action="Index">POS</a>
@@ -44,15 +51,16 @@
                             </li>
                         </ul>
                     }
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <ul class="navbar-nav ml-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" style="color: white; background-color: red; border: 1px solid red;" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
-                            </li>
-                        </ul>
-                    }
+                    
                 </div>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" style="color: white; background-color: red; border: 1px solid red;" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                        </li>
+                    </ul>
+                }
             </div>
         </nav>
     </header>
@@ -61,6 +69,44 @@
         .navbar-nav .nav-link:hover {
             color: red;
             background-color: white;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333; /* Set your desired text color */
+            padding: 10px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: #fff; /* Set your desired background color */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add shadow */
+            z-index: 1;
+            padding: 0;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 8px 12px;
+            color: #333; /* Set your desired text color */
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+            .dropdown-item:hover {
+                background-color: #e9ecef; /* Set your desired hover color */
+            }
+
+        .nav-item.dropdown:hover .dropdown-menu {
+            display: block;
         }
     </style>
     <div class="container">

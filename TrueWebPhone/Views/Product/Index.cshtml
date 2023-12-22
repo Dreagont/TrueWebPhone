@@ -7,9 +7,23 @@
 <div class="container mt-4">
     <h1>Product Management Page</h1>
 
+    <form asp-action="Search" method="get">
+        <div class="input-group mb-3">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">Search Product</button>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="searchString" placeholder="Enter product information">     
+        </div>
+        
+    </form>
+
     <p>
         <a class="btn btn-primary" asp-action="Create">Create New</a>
     </p>
+    
+
 
     <table class="table table-bordered">
         <thead>
