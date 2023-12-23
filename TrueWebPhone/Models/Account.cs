@@ -20,5 +20,7 @@ namespace TrueWebPhone.Models
         public string? Image { get; set; }
         public string? Role { get; set; }
         public string? Status { get; set; }
+
+        public bool isChangePass { get; set; }
     }
 }

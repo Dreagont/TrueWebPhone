@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TrueWebPhone.Controllers;
 using TrueWebPhone.Models;
+using Microsoft.Identity.Client;
 
 namespace TrueWebPhone.Controllers;
 
@@ -35,6 +36,24 @@ public class AccountController : Controller
 
     }
 
+    [HttpGet]
+
+    [AllowAnonymous]
+    public async Task<IActionResult> Profile()
+    {
+        var currentUsername = User.Identity.Name;
+
+        var account = await ct.Accounts
+            .FirstOrDefaultAsync(a => a.Username == currentUsername);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        return View(account);
+    }
+
     [OnlyUnauthenticated]
     public IActionResult Login()
     {
@@ -50,39 +69,45 @@ public class AccountController : Controller
             return View();
         }
 
-        if (account.Username == "admin" && account.Password == "123456")
+        var result = await validateLogin(account.Username, account.Password);
+
+        if (result == LoginResult.Success)
         {
-            if (ct.Accounts.Any(a => a.Username == "admin"))
+            // Check if the user needs to change their password
+            var user = await ct.Accounts.SingleOrDefaultAsync(a => a.Username == account.Username);
+            if (user != null && !user.isChangePass)
             {
-                await SaveLogin(account.Username, account.Password);
+                return RedirectToAction("ChangePassword", new { id = user.Id });
             }
-            else
-            {
-                await RegisterAdmin("admin@gmail.com", "admin");
-                await SaveLogin(account.Username, account.Password);
-            }
+
+            return RedirectToAction("Index");
         }
         else
         {
-            await validateLogin(account.Username, account.Password);
+            ModelState.AddModelError(string.Empty, "Invalid username or password");
+            return View("Login");
         }
-
-        return View();
     }
 
-    private async Task validateLogin(string username, string password)
+    private async Task<LoginResult> validateLogin(string username, string password)
     {
         var account = await ct.Accounts.SingleOrDefaultAsync(a => a.Username == username);
 
         if (account != null && BCrypt.Net.BCrypt.Verify(password, account.Password))
         {
             await SaveLogin(username, password);
+            return LoginResult.Success;
         }
         else
         {
-            ModelState.AddModelError(string.Empty, "Invalid username or password");
-            View("Login");
+            return LoginResult.Failure;
         }
+    }
+
+    public enum LoginResult
+    {
+        Success,
+        Failure
     }
 
     public async Task RegisterAdmin(string email, string name)
@@ -103,6 +128,7 @@ public class AccountController : Controller
             Password = passwordHash,
             Image = "default.jpg",
             Role = "Admin",
+            isChangePass = true,
             Status = "Active",
             Name = name,
         };
@@ -111,21 +137,33 @@ public class AccountController : Controller
         await ct.SaveChangesAsync();
     }
 
-    private async Task SaveLogin(String username, String password)
+   private async Task SaveLogin(string username, string password)
+{
+    var account = await ct.Accounts.SingleOrDefaultAsync(a => a.Username == username);
+
+    if (account != null && BCrypt.Net.BCrypt.Verify(password, account.Password))
     {
-        String role = "User";
+        if (!account.isChangePass)
+        {
+                RedirectToAction("ChangePassword", new { id = account.Id });
+                // Instead of returning, you can perform the redirect here
+                var redirectResult = RedirectToAction("ChangePassword", new { id = account.Id });
+                await redirectResult.ExecuteResultAsync(ControllerContext);
+                return;
+            }
+
+            string role = "User";
         if (username.Contains("admin")) role = "Admin";
         else role = "Seller";
 
-
-        var claims = new List<Claim>() {
+        var claims = new List<Claim>
+        {
             new(ClaimTypes.Name, username),
             new(ClaimTypes.Role, role),
-
         };
 
-        var indentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(indentity);
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
 
         await HttpContext.SignInAsync(principal);
 
@@ -133,6 +171,13 @@ public class AccountController : Controller
 
         Response.Redirect(returnUrl);
     }
+    else
+    {
+        ModelState.AddModelError(string.Empty, "Invalid username or password");
+        View("Login");
+    }
+}
+
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
@@ -213,6 +258,48 @@ public class AccountController : Controller
     }
 
     [HttpGet]
+    public IActionResult ChangePassword(int id)
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(int id, string oldPass, string newPass, string confPass)
+    {
+        var account = await ct.Accounts.FindAsync(id);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(oldPass, account.Password))
+        {
+            ModelState.AddModelError("OldPassword", "Incorrect old password");
+            return View(); 
+        }
+
+        if (newPass != confPass)
+        {
+            ModelState.AddModelError("ConfirmPassword", "New password and confirm password do not match");
+            return View(); 
+        }
+
+        account.Password = BCrypt.Net.BCrypt.HashPassword(newPass);
+        account.isChangePass = true;
+        await ct.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Password changed successfully";
+
+
+        return Redirect("/");
+    }
+
+
+
+
+    [HttpGet]
     [Authorize(Roles = "Admin")]
     public IActionResult Register()
     {
@@ -248,15 +335,18 @@ public class AccountController : Controller
             Image = "default.jpg",
             Role = "Seller",
             Status = "InActive",
+            isChangePass = false,
             Name = name,
         };
 
         ct.Accounts.Add(newAccount);
         await ct.SaveChangesAsync();
 
+        Account createAcc = ct.Accounts.FirstOrDefault(a => a.Username == newAccount.Username);
+
         var activationLink = Url.Action("ActivateAccount", "Account", new { id = newAccount.Id}, Request.Scheme);
 
-        await SendEmailAsync(email, "Confirm Account", activationLink);
+        await SendEmailAsync(email, "Confirm Account",  createAcc.Id );
 
 
         return RedirectToAction("Index");
@@ -264,8 +354,15 @@ public class AccountController : Controller
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> ActivateAccount(int id)
+    public async Task<IActionResult> ActivateAccount(int id, long timestamp)
     {
+        var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+        if (currentTimestamp - timestamp > 60)
+        {
+            return View("InvalidActivationLink");
+        }
+
         var account = await ct.Accounts.FindAsync(id);
 
         if (account == null)
@@ -273,17 +370,28 @@ public class AccountController : Controller
             return View("InvalidActivationLink");
         }
 
-        // Activate the account
         account.Status = "Active";
+
         await ct.SaveChangesAsync();
 
         return RedirectToAction("Login");
     }
 
-    private async Task<bool> SendEmailAsync(string email, string subject, string confirmlink)
+    [HttpGet]
+    public IActionResult InvalidActivationLink()
+    {
+        return View();
+    }
+
+
+
+    private async Task<bool> SendEmailAsync(string email, string subject, int accountId)
     {
         try
         {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var confirmlink = Url.Action("ActivateAccount", "Account", new { id = accountId, timestamp }, Request.Scheme);
+
             MailMessage message = new MailMessage();
             SmtpClient smtp = new SmtpClient();
             message.From = new MailAddress("vate202@gmail.com");
@@ -308,6 +416,7 @@ public class AccountController : Controller
         {
             return false;
         }
+
     }
 
     public IActionResult Forbidden()

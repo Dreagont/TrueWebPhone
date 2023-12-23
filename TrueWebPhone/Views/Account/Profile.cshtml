@@ -1,0 +1,43 @@
+﻿@model TrueWebPhone.Models.Account
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container mt-4">
+    <h1>User Profile</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="text-center">
+                <img src="@Model.Image" alt="User Image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+            </div>
+
+            <dl class="row mt-4">
+                <dt class="col-sm-3">ID:</dt>
+                <dd class="col-sm-9">@Model.Id</dd>
+
+                <dt class="col-sm-3">Username:</dt>
+                <dd class="col-sm-9">@Model.Username</dd>
+
+                <dt class="col-sm-3">Email:</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Name:</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+
+                <dt class="col-sm-3">Role:</dt>
+                <dd class="col-sm-9">@Model.Role</dd>
+
+                <dt class="col-sm-3">Status:</dt>
+                <dd class="col-sm-9">@Model.Status</dd>
+            </dl>
+
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Profile</a>
+
+                <a asp-action="ChangePassword" asp-route-id="@Model.Id" class="btn btn-warning ml-2">Change Password</a>
+
+                <a asp-action="Logout" class="btn btn-danger ml-2">Logout</a>
+            </div>

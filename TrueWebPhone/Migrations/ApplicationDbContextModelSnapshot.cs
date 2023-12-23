@@ -47,6 +47,9 @@ namespace TrueWebPhone.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool?>("isChangePass")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Accounts");
