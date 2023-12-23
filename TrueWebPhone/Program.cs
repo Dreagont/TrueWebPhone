@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TrueWebPhone.Models;
 
 namespace TrueWebPhone
 {
@@ -12,7 +14,7 @@ namespace TrueWebPhone
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseMySql("Server=localhost;Database=TrueWebPhone;User ID=root;Password=;",
+            options.UseMySql("Server=localhost;Database=truewebphone;User ID=root;Password=;",
                      new MariaDbServerVersion(new Version(10, 4, 28)))
            .EnableSensitiveDataLogging()  // Add this line for detailed query logging
            .LogTo(Console.WriteLine, LogLevel.Information));  // Log to console
@@ -52,6 +54,7 @@ namespace TrueWebPhone
 
                 // Apply database migration and update during application startup
                 dbContext.Database.Migrate();
+                CreateNewUserAccount(dbContext, "admin@gmail.com", "Admin");
             }
 
             app.MapControllerRoute(
@@ -60,5 +63,32 @@ namespace TrueWebPhone
 
             app.Run();
         }
+        private static void CreateNewUserAccount(ApplicationDbContext dbContext, string email, string name)
+        {
+            if (!dbContext.Accounts.Any(u => u.Username == "admin"))
+            {
+                string username = email.Substring(0, email.IndexOf('@'));
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword("123456");
+
+                var newAccount1 = new Account
+                {
+                    Email = email,
+                    Username = username,
+                    Password = passwordHash,
+                    Image = "default.jpg",
+                    Role = "Admin",
+                    isChangePass = true,
+                    Status = "Active",
+                    Name = name,
+                };
+
+
+                dbContext.Accounts.Add(newAccount1);
+                dbContext.SaveChanges();
+            }
+        }
+
     }
+
 }
+

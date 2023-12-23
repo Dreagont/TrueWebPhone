@@ -43,9 +43,7 @@
                     <td>@Html.DisplayFor(modelItem => item.Role)</td>
                     <td>@Html.DisplayFor(modelItem => item.Status)</td>
                     <td>
-                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editModal_@item.Id">
-                            Details
-                        </button>
+                        <a class="btn btn-success btn-sm" asp-action="Edit" asp-route-id="@item.Id">Details</a>
                     </td>
                 </tr>
 
@@ -59,10 +57,6 @@
                             </div>
                             <div class="modal-body">
 
-                                <!-- Avatar Image Frame -->
-                                <div class="text-center mb-3">
-                                    <img src="@item.Image" alt="Avatar" class="img-fluid rounded-circle" style="width: 100px; height: 100px;" />
-                                </div>
 
                                 <form asp-action="Edit" asp-route-id="@item.Id">
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
