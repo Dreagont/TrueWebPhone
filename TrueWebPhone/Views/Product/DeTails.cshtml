@@ -4,39 +4,63 @@
     ViewData["Title"] = "Details";
 }
 
-<div class="container mt-5">
-    <h1 class="text-center">Product Details</h1>
-    <hr />
+<h1 class="text-center">Product Details</h1>
 
+<div class="container">
     <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <dl class="row">
-                <dt class="col-sm-4">Product Name</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.ProductName)</dd>
-
-                <dt class="col-sm-4">Barcode</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.Barcode)</dd>
-
-                <dt class="col-sm-4">Import Price</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.ImportPrice)</dd>
-
-                <dt class="col-sm-4">Retail Price</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.RetailPrice)</dd>
-
-                <dt class="col-sm-4">Category</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(model => model.Category)</dd>
-
-                <dt class="col-sm-4">CreationDate</dt>
-                <dd class="col-sm-8">@Model.CreationDate.ToString("yyyy-MM-dd")</dd>
-
-                <dt class="col-sm-4">CreationTime</dt>
-                <dd class="col-sm-8">@Model.CreationDate.ToString("HH:mm:ss")</dd>
-            </dl>
+        <div class="col-md-4 d-flex align-items-center">
+            <!-- Display product image on the left with specific dimensions -->
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="~/uploads/@Model.ImagePath" alt="Product Image" class="img-fluid" style="width: 5cm; height: 6cm;" />
+            }
+            else
+            {
+                <span>No image available</span>
+            }
+        </div>
+        <div class="col-md-8">
+            <!-- Display other product details in a table -->
+            <table class="table table-bordered">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.ProductName)</th>
+                    <td>@Html.DisplayFor(model => model.ProductName)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Barcode)</th>
+                    <td>@Html.DisplayFor(model => model.Barcode)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.ImportPrice)</th>
+                    <td>@Html.DisplayFor(model => model.ImportPrice)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.RetailPrice)</th>
+                    <td>@Html.DisplayFor(model => model.RetailPrice)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Category)</th>
+                    <td>@Html.DisplayFor(model => model.Category)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.CreationDate)</th>
+                    <td>@Html.DisplayFor(model => model.CreationDate)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.IsSelled)</th>
+                    <td>@Html.DisplayFor(model => model.IsSelled)</td>
+                </tr>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Quantity)</th>
+                    <td>@Html.DisplayFor(model => model.Quantity)</td>
+                </tr>
+               
+            </table>
         </div>
     </div>
+</div>
 
-    <div class="mt-3 text-center">
-        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary">Edit</a> |
-        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-    </div>
+<div>
+    <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Edit", new { id = Model?.Id })'">Edit</button> |
+    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Index")'">Back to List</button>
 </div>

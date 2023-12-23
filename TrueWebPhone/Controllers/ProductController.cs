@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TrueWebPhone.Models;
 
 namespace TrueWebPhone.Controllers
@@ -6,9 +8,11 @@ namespace TrueWebPhone.Controllers
     public class ProductController : Controller
     {
         private readonly ApplicationDbContext ct;
-        public ProductController(ApplicationDbContext ct)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ProductController(ApplicationDbContext ct, IWebHostEnvironment webHostEnvironment)
         {
             this.ct = ct;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -25,19 +29,37 @@ namespace TrueWebPhone.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Product p)
+        public async Task<IActionResult> Create(Product model)
         {
-            if (ModelState.IsValid)
+            if (model.ProductImage != null)
             {
-                // Initialize related entities if needed
-                p.ProductOrders = new List<ProductOrder>();
+                // Save the file to your chosen storage (e.g., local storage)
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/");
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProductImage.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                ct.Products.Add(p);
-                ct.SaveChanges();
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ProductImage.CopyToAsync(fileStream);
+                }
+
+                // Update the Product entity with the file path or relevant information
+                model.ImagePath = uniqueFileName;
+
+                // Save the Product entity to the database
+                ct.Products.Add(model);
+                await ct.SaveChangesAsync();
+
                 return RedirectToAction("Index");
             }
-            return View();
-        }
+            else
+            {
+                ModelState.AddModelError("ProductImage", "Please choose a file to upload.");
+            }
+            return View(model);
+            }
+
+
 
         [HttpGet]
         public IActionResult Edit(int id)
@@ -54,29 +76,31 @@ namespace TrueWebPhone.Controllers
 
 
         [HttpPost]
-        public IActionResult Edit(Product updatedProduct)
+        public async Task<IActionResult> Edit(Product updatedProduct)
         {
-            if (ModelState.IsValid)
-            {
                 Product existingProduct = ct.Products.Find(updatedProduct.Id);
 
                 if (existingProduct == null)
                 {
                     return NotFound();
                 }
+
                 existingProduct.ProductName = updatedProduct.ProductName;
+                existingProduct.IsSelled = updatedProduct.IsSelled;
                 existingProduct.Barcode = updatedProduct.Barcode;
                 existingProduct.ImportPrice = updatedProduct.ImportPrice;
                 existingProduct.RetailPrice = updatedProduct.RetailPrice;
                 existingProduct.Category = updatedProduct.Category;
                 existingProduct.CreationDate = updatedProduct.CreationDate;
+                existingProduct.Quantity = updatedProduct.Quantity;
+
+               
                 ct.SaveChanges();
 
                 return RedirectToAction("Index");
-            }
-
-            return View(updatedProduct);
+            
         }
+
 
 
         [HttpGet]

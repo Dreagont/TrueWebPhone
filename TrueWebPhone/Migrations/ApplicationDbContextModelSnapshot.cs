@@ -149,18 +149,25 @@ namespace TrueWebPhone.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<decimal>("ImportPrice")
                         .HasColumnType("decimal(65,30)");
+
+                    b.Property<bool>("IsSelled")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("RetailPrice")
                         .HasColumnType("decimal(65,30)");
-
-                    b.Property<bool>("isSelled")
-                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
 

@@ -76,7 +76,10 @@ namespace TrueWebPhone.Migrations
                     Category = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreationDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    isSelled = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    IsSelled = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    ImagePath = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
