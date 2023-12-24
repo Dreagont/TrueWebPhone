@@ -13,17 +13,15 @@
         </div>
     </div>
     <div class="input-group mb-3">
-        <input type="text" class="form-control" name="searchString" placeholder="Enter customer information">
-        
+        <input type="text" class="form-control" name="searchString" id="searchString" placeholder="Enter customer information">
     </div>
-    
 </form>
 
 <p>
     <a class="btn btn-primary" asp-action="CreateCustomer">Create New</a>
 </p>
 
-<table class="table">
+<table class="table" id="customerTable">
     <thead>
         <tr>
             <th>
@@ -60,3 +58,21 @@
         }
     </tbody>
 </table>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#searchString").on("input", function () {
+                var searchString = $(this).val().toLowerCase();
+                $("#customerTable tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(searchString) > -1);
+                });
+            });
+        });
+    </script>
+}

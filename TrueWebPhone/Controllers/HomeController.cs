@@ -138,6 +138,33 @@ public class HomeController : Controller
         }
     }
 
+    [HttpPost]
+    public ActionResult CreateBill([FromBody] BillRequestModel requestData)
+    {
+        try
+        {
+            var cartItems = requestData.CartItems;
+            var customerPayment = requestData.CustomerPayment;
+            var customerPhone = requestData.CustomerPhone;
+
+            decimal calculatedTotalAmount = CalculateTotalAmount(cartItems);
+
+            
+
+
+            return Json(new { success = true, message = "Bill created successfully", totalAmount = calculatedTotalAmount , customerPhone , cartItems});
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, errorMessage = "An error occurred while processing your request. Please try again later." });
+        }
+    }
+
+
+    private decimal CalculateTotalAmount(List<CartItem> cartItems)
+    {
+        return cartItems.Sum(item => item.TotalPrice);
+    }
 
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -154,3 +181,9 @@ public class HomeController : Controller
     }
 }
 
+public class BillRequestModel
+{
+    public List<CartItem> CartItems { get; set; }
+    public decimal CustomerPayment { get; set; }
+    public string CustomerPhone { get; set; }
+}

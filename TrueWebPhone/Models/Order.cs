@@ -21,10 +21,6 @@ namespace TrueWebPhone.Models
         [Required]
         public string StaffId { get; set; }
         [Required]
-        public int TaxRate { get; set; }
-        [Required]
-        public int TaxFee { get; set; }
-        [Required]
         public int SubTotal { get; set; }
         [Required]
         public int Cash { get; set; }

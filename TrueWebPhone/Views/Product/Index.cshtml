@@ -14,18 +14,15 @@
             </div>
         </div>
         <div class="input-group mb-3">
-            <input type="text" class="form-control" name="searchString" placeholder="Enter product information">     
+            <input type="text" class="form-control" name="searchString" id="searchString" placeholder="Enter product information">
         </div>
-        
     </form>
 
     <p>
         <a class="btn btn-primary" asp-action="Create">Create New</a>
     </p>
-    
 
-
-    <table class="table table-bordered">
+    <table class="table table-bordered" id="productTable">
         <thead>
             <tr>
                 <th>@Html.DisplayNameFor(model => model.ProductName)</th>
@@ -59,3 +56,21 @@
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#searchString").on("input", function () {
+                var searchString = $(this).val().toLowerCase();
+                $("#productTable tbody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(searchString) > -1);
+                });
+            });
+        });
+    </script>
+}

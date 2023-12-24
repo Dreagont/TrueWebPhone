@@ -145,25 +145,24 @@
 <body>
     
     <main>
-        <div id = "product">
+        <div id="product">
             <h2>Product List</h2>
-        <div id="product-list">
+            <div id="product-list">
                 @foreach (var product in Model)
                 {
-                    <div class="product-item">
+                    <div class="product-item" data-product-id="@product.Id">
                         <img src="~/uploads/@product.ImagePath" alt="@product.ProductName" style="width: 5cm; height: 7cm;"><br>
                         <p>@product.ProductName - $@product.RetailPrice.ToString("0.##")</p>
                         <button class="add-to-cart-btn">Add to Cart</button>
                     </div>
                 }
-            
-        </div>
+            </div>
         </div>
     
         <div id="cart">
             <h2>Shopping Cart</h2>
 
-            <div id="cart-details" style=" height:300px">
+            <div id="cart-details" style="height:300px">
                 <!-- Cart details will be displayed here -->
             </div>
 
@@ -175,52 +174,171 @@
                 <label for="customer-payment">Customer Payment:</label>
                 <input type="text" id="customer-payment" name="customer-payment" placeholder="Enter amount">
             </div>
-            
-            <button>Checkout</button>
+            <button type="button" class="btn btn-primary" id="openCustomerModalBtn">
+                Make a payment
+            </button>
+            <button id="reset-cart-btn">Reset Cart</button>
+
         </div>
     </main>
 
     <footer>
        
     </footer>
+    <div class="modal fade" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customerModalLabel">Filling Information of Customer</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="checkoutForm" method="post">
+                        <div class="row">
+                            <div class="col">
+                                <label>Phone number</label>
+                                <input type="text" class="form-control" id="phone" placeholder="Enter phone's customer" name="phone" />
+                                <button type="submit" class="my-2 btn btn-primary">Checkout <i class="fa-solid fa-check-to-slot"></i></button>
+                            </div>
+                            <div class="col">
+                                <label>Full name</label>
+                                <input type="text" class="form-control" placeholder="Enter customer's name" id="fullname" name="fullname" />
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <label>Address</label>
+                                <input type="text" class="form-control" placeholder="Enter customer's address" id="address" name="address" />
+                            </div>
+                        </div>
+                    </form>
+
+                    <div id="messageContainer" class="mt-3"></div>
+
+                    <div id="existingCustomerInfo" style="display:none;">
+                        <p>Customer with the provided phone number already exists.</p>
+                        <p>Name: <span id="existingName"></span></p>
+                        <p>Address: <span id="existingAddress"></span></p>
+                    </div>
+
+                    <button id="addNewCustomer" class="btn btn-success mt-3">Add New Customer</button>
+                    <button class="btn btn-success mt-3" id="checkout-btn">Pay</button>
+                    <button class="btn btn-success mt-3" id="reset-customer-btn">Reset Customer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function () {
+        $("#openCustomerModalBtn").on("click", function () {
+            $("#customerModal").modal("show");
+        });
+
+        $("#reset-cart-btn").on("click", function () {
+            $("#cart-details").empty(); 
+            updateCartTotals(); 
+        });
+
+        $("#reset-customer-btn").on("click", function () {
+            $("#checkoutForm")[0].reset(); 
+            $("#messageContainer").empty(); 
+            $("#existingCustomerInfo").hide(); 
+        });
+
+
+        $("#checkoutForm").submit(function (event) {
+            event.preventDefault();
+            $.post("/Home/HandleCheckout", $(this).serialize(), function (data) {
+                console.log(data);
+
+                if (data.existingCustomer === true) {
+                    $("#fullname").val(data.existingName);
+                    $("#address").val(data.existingAddress);
+                    showMessage("Existing customer information loaded.", 'red');
+                } else {
+                    showMessage("Customer does not exist. Create a new one.", 'red');
+                }
+            });
+        });
+       
         $(".add-to-cart-btn").on("click", function () {
             var productInfo = $(this).siblings("p").text();
             var productPrice = parseFloat(productInfo.match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1]);
             var productName = productInfo.replace(/\s*\-\s*\$[0-9,]+(\.[0-9]{1,2})?/, "");
             var productImage = $(this).siblings("img").attr("src");
+            var productId = $(this).closest('.product-item').data('product-id');
 
-            // Check if the product already exists in the cart
+
+
             var existingCartItem = $(".cart-item").filter(function () {
                 return $(this).find('.product-name').text().includes(productName);
             });
 
             if (existingCartItem.length > 0) {
-                // Product already exists, increment the quantity
                 var existingQuantity = parseInt(existingCartItem.find('.quantity').text());
                 existingCartItem.find('.quantity').text(existingQuantity + 1);
             } else {
-                // Product doesn't exist, add a new item to the cart
                 $("#cart-details").append(
                     '<div class="cart-item">' +
                     '<img src="' + productImage + '" alt="' + productName + '" style="width: 3cm; height: 2cm;">' +
                     '<div>' +
                     '<p class="product-name">' + productName + ' - $' + productPrice.toFixed(2) + '</p>' +
-                    '<p class="quantity">1</p>' + // Add a quantity field
+                    '<p class="quantity">1</p>' + 
+                    '<p class = "product-id" hidden>' + productId + '</p>' +
                     '</div>' +
                     '<span class="delete-icon" onclick="removeCartItem(this)">&#128465;</span>' +
                     '</div>'
                 );
             }
-
-            // Update the total items and total price
             updateCartTotals();
         });
+        $("#checkout-btn").on("click", function () {
+            var cartItems = [];
 
+            $(".cart-item").each(function () {
+                var productName = $(this).find('.product-name').text();
+                var quantity = parseInt($(this).find('.quantity').text());
+                var id = parseInt($(this).find('.product-id').text());
+                var priceText = productName.match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
+                var itemPrice = parseFloat(priceText);
+                var totalPrice = itemPrice * quantity;
+                console.log(id +"," + quantity) ;
+
+                cartItems.push({
+                    productName: productName,
+                    quantity: quantity,
+                    totalPrice: totalPrice,
+                    productId : id
+                });
+            });
+            var customerPhone = $("#phone").val();
+            console.log(customerPhone);
+            var customerPayment = parseFloat($("#customer-payment").val()) || 0;
+            createBill(cartItems, customerPayment, customerPhone);
+        });
+        $("#addNewCustomer").click(function () {
+            var phone = $("#phone").val();
+            var name = $("#fullname").val();
+            var address = $("#address").val();
+
+            $.post("/Home/CreateCustomer", { phone: phone, name: name, address: address }, function (result) {
+                if (result.success === true) {
+                    showMessage("New customer added successfully!", 'green');
+                } else {
+                    showMessage("Error adding a new customer. " + result.errorMessage, 'red');
+                }
+            });
+        });
+
+        function showMessage(message, color) {
+            $("#messageContainer").text(message).css('color', color);
+        }
     });
 
     function removeCartItem(element) {
@@ -245,9 +363,43 @@
             totalPrice += itemPrice * quantity;
         });
 
-        // Update the total items and total price in the fixed cart details
         $("#total-items-text").text("Total Items: " + totalItems);
         $("#total-price-text").text("Total Price: $" + totalPrice.toFixed(2));
+    }
+
+    function createBill(cartItems, customerPayment, customerPhone) {
+        var backendEndpoint = "/Home/CreateBill";
+
+        if (!Array.isArray(cartItems)) {
+            console.error("Invalid cart items format");
+            return;
+        }
+
+        var requestData = {
+            cartItems: cartItems,
+            customerPayment: customerPayment,
+            customerPhone: customerPhone
+        };
+
+        $.ajax({
+            type: "POST",
+            url: backendEndpoint,
+            contentType: "application/json",
+            data: JSON.stringify(requestData),
+            success: function (response) {
+                console.log("Bill created successfully:", response);
+
+                var totalAmount = response.totalAmount || 0;
+                var change = customerPayment - totalAmount;
+
+                console.log("Customer Payment:", customerPayment);
+                console.log("Total Amount:", totalAmount);
+                console.log("Change:", change);
+            },
+            error: function (error) {
+                console.error("Error creating bill:", error);
+            }
+        });
     }
 </script>
 
