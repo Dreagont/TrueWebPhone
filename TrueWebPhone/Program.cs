@@ -75,7 +75,7 @@ namespace TrueWebPhone
                     Email = email,
                     Username = username,
                     Password = passwordHash,
-                    Image = "default.jpg",
+                    Image = "uploads/account/default.png",
                     Role = "Admin",
                     isChangePass = true,
                     Status = "Active",

@@ -8,15 +8,17 @@
 
   <ItemGroup>
     <Compile Remove="NewFolder\**" />
+    <Compile Remove="wwwroot\NewFolder\**" />
+    <Compile Remove="wwwroot\product\**" />
     <Content Remove="NewFolder\**" />
+    <Content Remove="wwwroot\NewFolder\**" />
+    <Content Remove="wwwroot\product\**" />
     <EmbeddedResource Remove="NewFolder\**" />
+    <EmbeddedResource Remove="wwwroot\NewFolder\**" />
+    <EmbeddedResource Remove="wwwroot\product\**" />
     <None Remove="NewFolder\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\content\images\images-70.jpg" />
-    <None Include="wwwroot\content\images\iphone13Black.jpg" />
-    <None Include="wwwroot\content\images\iphone14.jpg" />
+    <None Remove="wwwroot\NewFolder\**" />
+    <None Remove="wwwroot\product\**" />
   </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
@@ -32,10 +34,6 @@
 		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
 		
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="wwwroot\NewFolder\" />
-	  <Folder Include="wwwroot\product\image\" />
 	</ItemGroup>
 
 </Project>

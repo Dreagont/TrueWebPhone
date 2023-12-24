@@ -10,15 +10,21 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TrueWebPhone.Controllers;
 using TrueWebPhone.Models;
 using Microsoft.Identity.Client;
+using Microsoft.AspNetCore.Hosting;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TrueWebPhone.Controllers;
 
 public class AccountController : Controller
 {
     private readonly ApplicationDbContext ct;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public AccountController(ApplicationDbContext ct)
+
+    public AccountController(ApplicationDbContext ct, IWebHostEnvironment webHostEnvironment)
     {
+        _webHostEnvironment = webHostEnvironment;
+
         this.ct = ct;
     }
 
@@ -57,6 +63,7 @@ public class AccountController : Controller
     [OnlyUnauthenticated]
     public IActionResult Login()
     {
+
         return View();
     }
 
@@ -64,6 +71,7 @@ public class AccountController : Controller
     [OnlyUnauthenticated]
     public async Task<IActionResult> Login(Account account)
     {
+        account.AccountImage = null;
         if (!ModelState.IsValid)
         {
             return View();
@@ -126,7 +134,7 @@ public class AccountController : Controller
             Email = email,
             Username = username,
             Password = passwordHash,
-            Image = "default.jpg",
+            Image = "uploads/account/default.png",
             Role = "Admin",
             isChangePass = true,
             Status = "Active",
@@ -332,7 +340,7 @@ public class AccountController : Controller
             Email = email,
             Username = username,
             Password = passwordHash,
-            Image = "default.jpg",
+            Image = "uploads/account/default.png",
             Role = "Seller",
             Status = "InActive",
             isChangePass = false,
@@ -447,4 +455,66 @@ public class AccountController : Controller
 
         return View("Index", accounts);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> ChangePicture(int id, IFormFile newPicture)
+    {
+        try
+        {
+            var account = await ct.Accounts.FindAsync(id);
+
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            // Check if there is an existing image
+            if (!string.IsNullOrEmpty(account.Image))
+            {
+                // Delete the old image file
+                var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/account/", account.Image);
+                if (System.IO.File.Exists(oldImagePath))
+                {
+                    System.IO.File.Delete(oldImagePath);
+                }
+            }
+
+            if (newPicture != null)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/account/");
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(newPicture.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await newPicture.CopyToAsync(fileStream);
+                }
+
+                // Save the new picture to the specified path
+                account.Image ="uploads/account/" + uniqueFileName;
+
+                await ct.SaveChangesAsync();
+
+                // Log success information
+
+                return RedirectToAction("Profile");
+            }
+            else
+            {
+                // Log an error if the file is null or empty
+                Console.WriteLine("Error: The provided file is null or empty.");
+                return RedirectToAction("Profile");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log any exceptions that occur during the process
+            Console.WriteLine($"Error: {ex.Message}");
+            return RedirectToAction("Profile");
+        }
+    }
+
+
+
+
 }
