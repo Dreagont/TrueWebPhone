@@ -45,31 +45,98 @@ public class HomeController : Controller
         return View();
     }
 
-    [HttpPost]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> CreateCustomer(string phone, string name, string address)
+    public IActionResult Search(string searchString)
     {
-        if (ModelState.IsValid)
+        var customers = ct.Customers.ToList();
+
+        if (!string.IsNullOrEmpty(searchString))
         {
-            Customer customer = new Customer(phone, name, address);
-            ct.Customers.Add(customer);
-            ct.SaveChanges();
-            return Redirect("/");
+            customers = customers.Where(c =>
+                c.Name.ToLower().Contains(searchString) ||
+                c.Phone.ToLower().Contains(searchString) ||
+                c.Address.ToLower().Contains(searchString)
+            // Add additional fields you want to search here
+            ).ToList();
         }
 
-        foreach (var modelStateEntry in ModelState.Values)
+        return View("~/Views/Home/CustomerList.cshtml", customers);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin , Seller")]
+    public IActionResult CreateCustomer(string phone, string name, string address)
+    {
+        try
         {
-            foreach (var error in modelStateEntry.Errors)
+            if (ModelState.IsValid)
             {
-                Console.WriteLine($"Model error: {error.ErrorMessage}");
+                Customer customer = new Customer(phone, name, address);
+                ct.Customers.Add(customer);
+                ct.SaveChanges();
+
+                var successResult = new
+                {
+                    success = true
+                };
+
+                return Json(successResult);
+            }
+            else
+            {
+                var errorResult = new
+                {
+                    success = false,
+                    errorMessage = "Invalid input. Please check the provided data."
+                };
+
+                return Json(errorResult);
             }
         }
+        catch (Exception ex)
+        {
+            var errorResult = new
+            {
+                success = false,
+                errorMessage = "An error occurred while processing your request. Please try again later."
+            };
 
-        return View();
+            return Json(errorResult);
+        }
     }
 
 
 
+
+    [HttpPost]
+    [AllowAnonymous]
+    public IActionResult HandleCheckout(string phone, string fullname, string address, int paymethod)
+    {
+        // Log the received phone number for debugging
+        System.Diagnostics.Debug.WriteLine($"Received phone: {phone}");
+
+        var existingCustomer = ct.Customers.FirstOrDefault(c => c.Phone == phone);
+
+        if (existingCustomer != null)
+        {
+            var result = new
+            {
+                ExistingCustomer = true,
+                ExistingName = existingCustomer.Name,
+                ExistingAddress = existingCustomer.Address
+            };
+
+            return Json(result);
+        }
+        else
+        {
+            var result = new
+            {
+                ExistingCustomer = false
+            };
+
+            return Json(result);
+        }
+    }
 
 
 

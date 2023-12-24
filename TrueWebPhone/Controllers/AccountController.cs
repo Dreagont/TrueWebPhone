@@ -80,7 +80,7 @@ public class AccountController : Controller
                 return RedirectToAction("ChangePassword", new { id = user.Id });
             }
 
-            return RedirectToAction("Index");
+            return Redirect("/");
         }
         else
         {
