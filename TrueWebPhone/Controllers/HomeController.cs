@@ -146,19 +146,67 @@ public class HomeController : Controller
             var cartItems = requestData.CartItems;
             var customerPayment = requestData.CustomerPayment;
             var customerPhone = requestData.CustomerPhone;
+            var paymentMethod = requestData.PaymentMethod;
+
+            var currentUsername = User.Identity.Name;
+
+            Account staff = ct.Accounts.FirstOrDefault(a => a.Username == currentUsername);
+
+            Customer customer = ct.Customers.FirstOrDefault(a => a.Phone == customerPhone);
+
+            if (customer == null)
+            {
+                return Json(new { success = false, errorMessage = "Customer not found." });
+            }
 
             decimal calculatedTotalAmount = CalculateTotalAmount(cartItems);
 
-            
+            var order = new Order
+            {
+                StaffId = staff?.Id ?? 0, 
+                Cash = customerPayment,
+                CustomerId = customer.Id,
+                Change = calculatedTotalAmount,
+                Total = cartItems.Sum(item => item.TotalPrice),
+                Quantity = cartItems.Sum(item => item.Quantity),
+                PaymentMethod = paymentMethod,
+                CreatedDate = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+                OrderNumber = GenerateRandomOrderNumber()
+            };
 
+            ct.Orders.Add(order);
+            ct.SaveChanges();
 
-            return Json(new { success = true, message = "Bill created successfully", totalAmount = calculatedTotalAmount , customerPhone , cartItems});
+            foreach (var cartItem in cartItems)
+            {
+                var productOrder = new ProductOrder
+                {
+                    OrderId = order.Id, 
+                    ProductId = cartItem.ProductId,
+                    ProductQuantity = cartItem.Quantity
+                };
+
+                ct.ProductOrders.Add(productOrder);
+            }
+
+            ct.SaveChanges(); // Save the changes with the product orders
+
+            return Json(new
+            {
+                success = true,
+                message = "Bill created successfully",
+                totalAmount = calculatedTotalAmount,
+                paymentMethod,
+                customerPhone,
+                cartItems
+            });
         }
         catch (Exception ex)
         {
             return Json(new { success = false, errorMessage = "An error occurred while processing your request. Please try again later." });
         }
     }
+
 
 
     private decimal CalculateTotalAmount(List<CartItem> cartItems)
@@ -179,6 +227,15 @@ public class HomeController : Controller
         ViewData["ErrorMessage"] = $"Error occurred. The ErrorCode is: {code}";
         return View("Error");
     }
+    private string GenerateRandomOrderNumber()
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var random = new Random();
+        var orderNumber = new string(Enumerable.Repeat(chars, 6)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+
+        return orderNumber;
+    }
 }
 
 public class BillRequestModel
@@ -186,4 +243,6 @@ public class BillRequestModel
     public List<CartItem> CartItems { get; set; }
     public decimal CustomerPayment { get; set; }
     public string CustomerPhone { get; set; }
+    public string PaymentMethod { get; set; }
+
 }

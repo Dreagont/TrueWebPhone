@@ -213,6 +213,16 @@
                                 <input type="text" class="form-control" placeholder="Enter customer's address" id="address" name="address" />
                             </div>
                         </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <label for="payment-method">Payment Method:</label>
+                                <select class="form-control" id="payment-method" name="payment-method">
+                                    <option value="cash">Cash</option>
+                                    <option value="visa">Visa</option>
+                                    <option value="momo">Momo</option>
+                                </select>
+                            </div>
+                        </div>
                     </form>
 
                     <div id="messageContainer" class="mt-3"></div>
@@ -255,7 +265,6 @@
         $("#checkoutForm").submit(function (event) {
             event.preventDefault();
             $.post("/Home/HandleCheckout", $(this).serialize(), function (data) {
-                console.log(data);
 
                 if (data.existingCustomer === true) {
                     $("#fullname").val(data.existingName);
@@ -308,17 +317,16 @@
                 var priceText = productName.match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
                 var itemPrice = parseFloat(priceText);
                 var totalPrice = itemPrice * quantity;
-                console.log(id +"," + quantity) ;
+                var correctName = productName.split(' - ')[0];
 
                 cartItems.push({
-                    productName: productName,
+                    productName: correctName,
                     quantity: quantity,
                     totalPrice: totalPrice,
                     productId : id
                 });
             });
             var customerPhone = $("#phone").val();
-            console.log(customerPhone);
             var customerPayment = parseFloat($("#customer-payment").val()) || 0;
             createBill(cartItems, customerPayment, customerPhone);
         });
@@ -358,7 +366,8 @@
         $(".cart-item").each(function () {
             var quantity = parseInt($(this).find('.quantity').text());
             var priceText = $(this).find('.product-name').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
-            var itemPrice = parseFloat(priceText); // Extract numeric value from the text
+            var itemPrice = parseFloat(priceText);
+            
             totalItems += quantity;
             totalPrice += itemPrice * quantity;
         });
@@ -375,10 +384,13 @@
             return;
         }
 
+        var selectedPaymentMethod = $("#payment-method").val();
+
         var requestData = {
             cartItems: cartItems,
             customerPayment: customerPayment,
-            customerPhone: customerPhone
+            customerPhone: customerPhone,
+            paymentMethod: selectedPaymentMethod
         };
 
         $.ajax({
@@ -389,12 +401,7 @@
             success: function (response) {
                 console.log("Bill created successfully:", response);
 
-                var totalAmount = response.totalAmount || 0;
-                var change = customerPayment - totalAmount;
-
-                console.log("Customer Payment:", customerPayment);
-                console.log("Total Amount:", totalAmount);
-                console.log("Change:", change);
+               
             },
             error: function (error) {
                 console.error("Error creating bill:", error);

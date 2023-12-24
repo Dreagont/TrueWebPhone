@@ -36,14 +36,7 @@ namespace TrueWebPhone.Models
 
         // Remove [Required] attribute to allow null or empty value during file upload processing
         public string ImagePath { get; set; }
-
-        public ICollection<ProductOrder> ProductOrders { get; set; }
-
-        public Product()
-        {
-            ProductOrders = new List<ProductOrder>();
-        }
-
+       
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (ImportPrice >= RetailPrice)

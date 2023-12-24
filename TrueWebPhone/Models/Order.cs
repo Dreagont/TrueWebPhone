@@ -8,33 +8,27 @@ namespace TrueWebPhone.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string OrderNumber { get; set; }
 
         [Required]
-        public string CustomerId { get; set; }
+        public int CustomerId { get; set; }
         [Required]
-        public Customer Customer { get; set; }
+        public int StaffId { get; set; }   
         [Required]
-        public string StaffId { get; set; }
+        public decimal Cash { get; set; }
         [Required]
-        public int SubTotal { get; set; }
+        public decimal Change { get; set; }
         [Required]
-        public int Cash { get; set; }
-        [Required]
-        public int Change { get; set; }
-        [Required]
-        public int Total { get; set; }
+        public decimal Total { get; set; }
         [Required]
         public int Quantity { get; set; }
         [Required]
-        public int PaymentMethod { get; set; }
+        public string PaymentMethod { get; set; }
         [Required]
         public string CreatedDate { get; set; }
-        public ICollection<ProductOrder> ProductOrders { get; set; }
 
     }
 }
