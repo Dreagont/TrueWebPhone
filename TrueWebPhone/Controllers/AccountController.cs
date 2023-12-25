@@ -101,6 +101,11 @@ public class AccountController : Controller
     {
         var account = await ct.Accounts.SingleOrDefaultAsync(a => a.Username == username);
 
+        if ((bool)account.IsBlocked)
+        {
+            return LoginResult.Failure;
+        }
+
         if (account != null && BCrypt.Net.BCrypt.Verify(password, account.Password))
         {
             await SaveLogin(username, password);
@@ -145,7 +150,24 @@ public class AccountController : Controller
         await ct.SaveChangesAsync();
     }
 
-   private async Task SaveLogin(string username, string password)
+    [HttpPost]
+    public IActionResult BlockOrUnblock(int id)
+    {
+        var account = ct.Accounts.FirstOrDefault(x => x.Id == id);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        account.IsBlocked = !account.IsBlocked;
+        ct.SaveChanges();
+
+
+        return RedirectToAction("Index"); 
+    }
+
+    private async Task SaveLogin(string username, string password)
 {
     var account = await ct.Accounts.SingleOrDefaultAsync(a => a.Username == username);
 

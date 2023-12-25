@@ -296,59 +296,66 @@
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                </div>
-            </div>
-        </div>
-    </div>
+                                    <p><strong>Customer Name:</strong> <span id="customerName"></span></p>
+                                    <p><strong>Customer Phone:</strong> <span id="customerPhone"></span></p>
+                                    <p><strong>Customer Address:</strong> <span id="customerAddress"></span></p>
+                                    <p><strong>Staff Name:</strong> <span id="staffName"></span></p>
+                                    <h4>Order Details</h4>
+                                    <table class="table" id="orderDetailsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Total Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                    <button id="download-pdf-btn" class="btn btn-primary">Download as PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 </body>
 </html>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 <script src="https://unpkg.com/html2pdf.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" 
+integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
+crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.debug.js"></script>
 <script>
     function displayInvoiceModal(invoiceDetails) {
-        // Generate HTML for displaying invoice details
-        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
-            '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
-            '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
-            '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
-            '<h4>Order Details</h4>' +
-            '<table class="table">' +
-            '<thead>' +
-            '<tr>' +
-            '<th>Product Name</th>' +
-            '<th>Quantity</th>' +
-            '<th>Total Price</th>' +
-            '</tr>' +
-            '</thead>' +
-            '<tbody>';
+        $("#customerName").text(invoiceDetails.customerName);
+        $("#customerPhone").text(invoiceDetails.customerPhone);
+        $("#customerAddress").text(invoiceDetails.customerAddress);
+        $("#staffName").text(invoiceDetails.staffName);
 
+        var orderDetailsHtml = "";
         for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
             var orderDetail = invoiceDetails.orderDetails[i];
-            invoiceHtml += '<tr>' +
+            orderDetailsHtml += '<tr>' +
                 '<td>' + orderDetail.productName + '</td>' +
                 '<td>' + orderDetail.quantity + '</td>' +
                 '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
                 '</tr>';
         }
+        $("#orderDetailsTable tbody").html(orderDetailsHtml);
 
-        invoiceHtml += '</tbody></table>';
-
-        invoiceHtml += '<button id="download-pdf-btn">Download as PDF</button>';
-
-        // Update modal content with invoice details
-        $("#invoiceModal").find(".modal-body").html(invoiceHtml);
-
-        // Show the modal
-        $("#invoiceModal").modal("show");
-
-        $("#download-pdf-btn").on("click", function () {
-            downloadPDF(invoiceDetails);
+        $("#invoiceModal").modal("show").on('shown.bs.modal', function () {
+            $("#download-pdf-btn").on("click", function () {
+                downloadPDF(invoiceDetails, function () {
+                    $("#invoiceModal").modal("hide");
+                });
+            });
         });
-
     }
-
 
     function downloadPDF(invoiceDetails) {
         if (!invoiceDetails || !invoiceDetails.orderDetails) {
@@ -356,46 +363,40 @@
             return;
         }
 
-        // Generate HTML for displaying invoice details
-        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
-            '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
-            '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
-            '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
-            '<h4>Order Details</h4>' +
-            '<table class="table">' +
-            '<thead>' +
-            '<tr>' +
-            '<th>Product Name</th>' +
-            '<th>Quantity</th>' +
-            '<th>Total Price</th>' +
-            '</tr>' +
-            '</thead>' +
-            '<tbody>';
+        var pdfDoc = new jsPDF();
 
+        var currentDate = new Date().toLocaleDateString();
+        var currentTime = new Date().toLocaleTimeString();
+
+        pdfDoc.text(`Date: ${currentDate}`, 10, 10);
+        pdfDoc.text(`Time: ${currentTime}`, 10, 20);
+        pdfDoc.text(`Customer Name: ${invoiceDetails.customerName}`, 10, 30);
+        pdfDoc.text(`Customer Phone: ${invoiceDetails.customerPhone}`, 10, 40);
+        pdfDoc.text(`Customer Address: ${invoiceDetails.customerAddress}`, 10, 50);
+        pdfDoc.text(`Staff Name: ${invoiceDetails.staffName}`, 10, 60);
+        pdfDoc.text('Order Details', 10, 80);
+
+        var yPosition = 90;
         for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
             var orderDetail = invoiceDetails.orderDetails[i];
-            invoiceHtml += '<tr>' +
-                '<td>' + orderDetail.productName + '</td>' +
-                '<td>' + orderDetail.quantity + '</td>' +
-                '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
-                '</tr>';
+            pdfDoc.text(orderDetail.productName, 10, yPosition);
+            pdfDoc.text(`Quantity: ${orderDetail.quantity}`, 80, yPosition);
+            pdfDoc.text(`Total Price: $${orderDetail.totalPrice.toFixed(2)}`, 120, yPosition);
+            yPosition += 20;
         }
 
-        invoiceHtml += '</tbody></table>';
+        var totalAmount = invoiceDetails.orderDetails.reduce((total, item) => total + item.totalPrice, 0);
+        var customerPayment = parseFloat($("#customer-payment").val()) || 0; 
+        var change = customerPayment - totalAmount;
 
-        // Create a new HTML element with the invoice content
-        var invoiceElement = document.createElement("div");
-        invoiceElement.innerHTML = invoiceHtml;
+        pdfDoc.text(`Total Amount: $${totalAmount.toFixed(2)}`, 10, yPosition + 20);
+        pdfDoc.text(`Customer Payment: $${customerPayment.toFixed(2)}`, 10, yPosition + 30);
+        pdfDoc.text(`Change: $${change.toFixed(2)}`, 10, yPosition + 40);
 
-        // Use html2pdf to generate the PDF
-        html2pdf(invoiceElement, {
-            margin: 10,
-            filename: 'invoice.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        });
+        pdfDoc.save('invoice.pdf');
     }
+
+
 
 
 
@@ -491,7 +492,7 @@
             var customerPhone = $("#phone").val();
             var customerPayment = parseFloat($("#customer-payment").val()) || 0;
             createBill(cartItems, customerPayment, customerPhone);
-            d
+            
         });
         $("#addNewCustomer").click(function () {
             var phone = $("#phone").val();
@@ -566,8 +567,6 @@
             success: function (response) {
                 console.log("Bill created successfully:", response);
                 if (response.success) {
-                    // Display the invoice modal
-                    console.log("ok");
                     displayInvoiceModal(response.invoiceDetails);
                 }
                

@@ -187,6 +187,12 @@ namespace TrueWebPhone.Controllers
                             ProductId = cartItem.ProductId,
                             ProductQuantity = cartItem.Quantity
                         };
+                        var product = ct.Products.FirstOrDefault(p => p.Id == cartItem.ProductId);
+
+                        if (product != null)
+                        {
+                            product.IsSelled = true;
+                        }
 
                         ct.ProductOrders.Add(productOrder);
                     }
