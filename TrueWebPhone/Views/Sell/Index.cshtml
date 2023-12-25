@@ -180,6 +180,7 @@
             <button id="reset-cart-btn">Reset Cart</button>
 
         </div>
+
     </main>
 
     <footer>
@@ -236,6 +237,18 @@
                     <button id="addNewCustomer" class="btn btn-success mt-3">Add New Customer</button>
                     <button class="btn btn-success mt-3" id="checkout-btn">Pay</button>
                     <button class="btn btn-success mt-3" id="reset-customer-btn">Reset Customer</button>
+
+
+                    <div class="modal fade" id="invoiceModal" tabindex="-1" role="dialog" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="invoiceModalLabel">Invoice Details</h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
                 </div>
             </div>
         </div>
@@ -244,8 +257,106 @@
 </html>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+<script src="https://unpkg.com/html2pdf.js"></script>
 <script>
-    $(document).ready(function () {
+
+    function displayInvoiceModal(invoiceDetails) {
+        // Generate HTML for displaying invoice details
+        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
+            '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
+            '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
+            '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
+            '<h4>Order Details</h4>' +
+            '<table class="table">' +
+            '<thead>' +
+            '<tr>' +
+            '<th>Product Name</th>' +
+            '<th>Quantity</th>' +
+            '<th>Total Price</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<tbody>';
+
+        for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
+            var orderDetail = invoiceDetails.orderDetails[i];
+            invoiceHtml += '<tr>' +
+                '<td>' + orderDetail.productName + '</td>' +
+                '<td>' + orderDetail.quantity + '</td>' +
+                '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
+                '</tr>';
+        }
+
+        invoiceHtml += '</tbody></table>';
+
+        invoiceHtml += '<button id="download-pdf-btn">Download as PDF</button>';
+
+        // Update modal content with invoice details
+        $("#invoiceModal").find(".modal-body").html(invoiceHtml);
+
+        // Show the modal
+        $("#invoiceModal").modal("show");
+
+        $("#download-pdf-btn").on("click", function () {
+            downloadPDF(invoiceDetails);
+        });
+
+    }
+
+
+    function downloadPDF(invoiceDetails) {
+        if (!invoiceDetails || !invoiceDetails.orderDetails) {
+            console.error('OrderDetails is undefined or null in invoiceDetails.');
+            return;
+        }
+
+        // Generate HTML for displaying invoice details
+        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
+            '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
+            '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
+            '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
+            '<h4>Order Details</h4>' +
+            '<table class="table">' +
+            '<thead>' +
+            '<tr>' +
+            '<th>Product Name</th>' +
+            '<th>Quantity</th>' +
+            '<th>Total Price</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<tbody>';
+
+        for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
+            var orderDetail = invoiceDetails.orderDetails[i];
+            invoiceHtml += '<tr>' +
+                '<td>' + orderDetail.productName + '</td>' +
+                '<td>' + orderDetail.quantity + '</td>' +
+                '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
+                '</tr>';
+        }
+
+        invoiceHtml += '</tbody></table>';
+
+        // Create a new HTML element with the invoice content
+        var invoiceElement = document.createElement("div");
+        invoiceElement.innerHTML = invoiceHtml;
+
+        // Use html2pdf to generate the PDF
+        html2pdf(invoiceElement, {
+            margin: 10,
+            filename: 'invoice.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        });
+    }
+
+
+
+
+    $(document).ready(function () 
+    {
+
         $("#openCustomerModalBtn").on("click", function () {
             $("#customerModal").modal("show");
         });
@@ -311,24 +422,30 @@
             var cartItems = [];
 
             $(".cart-item").each(function () {
-                var productName = $(this).find('.product-name').text();
-                var quantity = parseInt($(this).find('.quantity').text());
-                var id = parseInt($(this).find('.product-id').text());
-                var priceText = productName.match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
-                var itemPrice = parseFloat(priceText);
-                var totalPrice = itemPrice * quantity;
-                var correctName = productName.split(' - ')[0];
+                var $cartItem = $(this);
+                $cartItem.find('.product-name').each(function () {
+                    var productNameWithPrice = $(this).text();
+                    var quantity = parseInt($cartItem.find('.quantity').text());
+                    var id = parseInt($cartItem.find('.product-id').text());
 
-                cartItems.push({
-                    productName: correctName,
-                    quantity: quantity,
-                    totalPrice: totalPrice,
-                    productId : id
+                    // Extract product name and price separately
+                    var matches = productNameWithPrice.match(/^(.*?) - \$(\d+(\.\d{1,2})?)$/);
+                    var productName = matches[1];
+                    var itemPrice = parseFloat(matches[2]);
+                    var totalPrice = itemPrice * quantity;
+
+                    cartItems.push({
+                        productName: productName,
+                        quantity: quantity,
+                        totalPrice: totalPrice,
+                        productId: id
+                    });
                 });
             });
             var customerPhone = $("#phone").val();
             var customerPayment = parseFloat($("#customer-payment").val()) || 0;
             createBill(cartItems, customerPayment, customerPhone);
+            d
         });
         $("#addNewCustomer").click(function () {
             var phone = $("#phone").val();
@@ -347,6 +464,8 @@
         function showMessage(message, color) {
             $("#messageContainer").text(message).css('color', color);
         }
+
+        
     });
 
     function removeCartItem(element) {
@@ -400,7 +519,11 @@
             data: JSON.stringify(requestData),
             success: function (response) {
                 console.log("Bill created successfully:", response);
-
+                if (response.success) {
+                    // Display the invoice modal
+                    console.log("ok");
+                    displayInvoiceModal(response.invoiceDetails);
+                }
                
             },
             error: function (error) {

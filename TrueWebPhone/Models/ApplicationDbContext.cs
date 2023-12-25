@@ -22,5 +22,10 @@ public class ApplicationDbContext : DbContext
                 .HasIndex(c => c.Phone)
                 .IsUnique();
 
+
+        modelBuilder.Entity<ProductOrder>().HasKey(po => po.ProductOrderId);
+
+        base.OnModelCreating(modelBuilder);
     }
 }
+

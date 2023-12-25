@@ -177,19 +177,41 @@ public class HomeController : Controller
             ct.Orders.Add(order);
             ct.SaveChanges();
 
-            foreach (var cartItem in cartItems)
+            try
             {
-                var productOrder = new ProductOrder
+                foreach (var cartItem in cartItems)
                 {
-                    OrderId = order.Id, 
-                    ProductId = cartItem.ProductId,
-                    ProductQuantity = cartItem.Quantity
-                };
+                    var productOrder = new ProductOrder
+                    {
+                        OrderId = order.Id,
+                        ProductId = cartItem.ProductId,
+                        ProductQuantity = cartItem.Quantity
+                    };
 
-                ct.ProductOrders.Add(productOrder);
+                    ct.ProductOrders.Add(productOrder);
+                }
+
+                ct.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error saving product orders to the database: " + ex.Message);
+                throw; // Rethrow the exception to see it in the console or logs
             }
 
-            ct.SaveChanges(); // Save the changes with the product orders
+            var invoiceDetails = new
+            {
+                CustomerName = customer.Name,
+                CustomerPhone = customer.Phone,
+                CustomerAddress = customer.Address,
+                StaffName = staff?.Name ?? "N/A", // Replace "N/A" with a default value if staff is not found
+                OrderDetails = cartItems.Select(item => new
+                {
+                    ProductName = item.ProductName,
+                    Quantity = item.Quantity,
+                    TotalPrice = item.TotalPrice
+                })
+            };
 
             return Json(new
             {
@@ -198,8 +220,14 @@ public class HomeController : Controller
                 totalAmount = calculatedTotalAmount,
                 paymentMethod,
                 customerPhone,
-                cartItems
+                cartItems,
+                invoiceDetails
+
             });
+
+           
+
+           
         }
         catch (Exception ex)
         {
