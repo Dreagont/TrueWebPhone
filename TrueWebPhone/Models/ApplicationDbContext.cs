@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<ProductOrder> ProductOrders { get; set; }
+    public DbSet<Resend> Resends { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

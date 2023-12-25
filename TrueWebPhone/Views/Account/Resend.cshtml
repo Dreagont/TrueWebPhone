@@ -1,0 +1,48 @@
+﻿@model IEnumerable<TrueWebPhone.Models.Resend>
+
+@{
+    ViewData["Title"] = "Resend";
+}
+
+<h1>Resend</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UserId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UserMail)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserMail)
+                </td>
+                <td>
+                    <form id="resendForm-@item.UserId" method="post" asp-controller="Account" asp-action="Resend">
+                        <input type="hidden" name="userId" value="@item.UserId" />
+                        <button type="submit" class="btn btn-success">Resend</button>
+                    </form>
+
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    var successMessage = "@TempData["SuccessMessage"]";
+    if (successMessage) {
+        alert(successMessage);
+    }
+</script>

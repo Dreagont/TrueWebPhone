@@ -4,4 +4,36 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<p>The activation link is invalid or has expired. Please request a new activation link.</p>
+    <p id="message">The activation link is invalid or has expired. Please request a new activation link.</p>
+
+    <form id="resendForm" method="post">
+        <input type="hidden" id="userId" value="@ViewData["UserId"]" />
+        <button type="button" class="btn btn-success" onclick="resendActivation()">Resend Activation Link</button>
+    </form>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function resendActivation() {
+            var userId = document.getElementById("userId").value;
+
+            // Use AJAX to send a request to the server
+            $.ajax({
+                url: '/Account/ResendEmailRequest?id=' + userId,
+                type: 'GET',
+                success: function () {
+                    // Update the message on success
+                    $('#message').text('Activation link resent successfully.');
+                },
+                error: function () {
+                    // Handle errors if needed
+                $('#message').text('Activation link resent successfully.');
+
+                setTimeout(function () {
+                    window.location.href = '/';
+                }, 2000);
+                    
+                }
+            });
+        }
+    </script>

@@ -1,0 +1,93 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "Order Details";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewBag.Title</title>
+
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h1>Order Details</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="orderNumber">Order Number:</label>
+                    <input type="text" class="form-control" id="orderNumber" value="@Model.orderNumber" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="change">Change:</label>
+                    <input type="text" class="form-control" id="change" value="@Model.change" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="cash">Cash:</label>
+                    <input type="text" class="form-control" id="cash" value="@Model.cash" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="total">Total:</label>
+                    <input type="text" class="form-control" id="total" value="@Model.total" readonly>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="payment">Payment Method:</label>
+                    <input type="text" class="form-control" id="payment" value="@Model.payment" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="text" class="form-control" id="date" value="@Model.date" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="cusName">Customer Name:</label>
+                    <input type="text" class="form-control" id="cusName" value="@Model.cusName" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="text" class="form-control" id="phone" value="@Model.phone" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="sellerName">Seller Name:</label>
+                    <input type="text" class="form-control" id="sellerName" value="@Model.sellerName" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+        // Your existing script
+        var details = @Html.Raw(Json.Serialize(Model));
+        $("#orderNumber").val(details.orderNumber);
+        $("#change").val(details.change);
+        $("#cash").val(details.cash);
+        $("#total").val(details.total);
+        $("#payment").val(details.payment);
+        $("#date").val(details.date);
+        $("#cusName").val(details.cusName);
+        $("#phone").val(details.phone);
+        $("#sellerName").val(details.sellerName);
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TrueWebPhone.Models;
@@ -23,12 +24,14 @@ namespace TrueWebPhone.Controllers
             return View(products);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Product model)
         {
             if (model.ProductImage != null)
@@ -60,8 +63,8 @@ namespace TrueWebPhone.Controllers
             }
 
 
-
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(int id)
         {
             Product product = ct.Products.Find(id);
@@ -76,6 +79,7 @@ namespace TrueWebPhone.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(Product updatedProduct)
         {
                 Product existingProduct = ct.Products.Find(updatedProduct.Id);
@@ -104,6 +108,7 @@ namespace TrueWebPhone.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             var product = ct.Products.Find(id);
@@ -117,6 +122,7 @@ namespace TrueWebPhone.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteConfirmed(int id)
         {
             Product product = ct.Products.Find(id);

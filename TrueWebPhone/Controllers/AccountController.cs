@@ -368,15 +368,16 @@ public class AccountController : Controller
 
         if (currentTimestamp - timestamp > 60)
         {
-            return View("InvalidActivationLink");
+            return RedirectToAction("InvalidActivationLink", new { userId = id });
         }
 
         var account = await ct.Accounts.FindAsync(id);
 
         if (account == null)
         {
-            return View("InvalidActivationLink");
+            return View("InvalidLink");
         }
+
 
         account.Status = "Active";
 
@@ -386,8 +387,10 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult InvalidActivationLink()
+    public IActionResult InvalidActivationLink(int userId)
     {
+        ViewData["UserId"] = userId;
+
         return View();
     }
 
@@ -425,6 +428,73 @@ public class AccountController : Controller
             return false;
         }
 
+    }
+
+    public IActionResult Resend()
+    {
+        var resend = ct.Resends.ToList();
+        return View(resend);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Resend(int userId)
+    {
+        var resend = ct.Resends.FirstOrDefault(a => a.UserId == userId);
+
+        await SendEmailAsync(resend.UserMail, "Resend Email", (int)resend.UserId);
+
+        ct.Resends.Remove(resend);
+        ct.SaveChanges();
+        TempData["SuccessMessage"] = "Email resend successful!";
+
+        return RedirectToAction("Resend");
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+
+    public IActionResult Delete(int id)
+    {
+        var account = ct.Accounts.Find(id);
+
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        return View(account);
+    }
+
+    [HttpPost]
+    public IActionResult DeleteConfirmed(int id)
+    {
+        Account product = ct.Accounts.Find(id);
+
+        ct.Accounts.Remove(product);
+        ct.SaveChanges();
+        return RedirectToAction("Index");
+    }
+
+
+    public IActionResult ResendEmailRequest(int id)
+    {
+        var user = ct.Accounts.FirstOrDefault(a => a.Id == id);
+
+        var resend = new Resend();
+        resend.UserId = user.Id;
+        resend.UserMail = user.Email;
+
+        var check = ct.Resends.FirstOrDefault(a => a.UserId == resend.UserId);
+
+        if (check != null)
+        {
+            return View();
+        } else
+        {
+            ct.Resends.Add(resend);
+            ct.SaveChanges();
+            return View();
+        }
     }
 
     public IActionResult Forbidden()
