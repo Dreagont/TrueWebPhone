@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TrueWebPhone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231222211023_v1")]
-    partial class v1
+    [Migration("20231225102946_Initial1")]
+    partial class Initial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,6 +50,9 @@ namespace TrueWebPhone.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("isChangePass")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Accounts");
@@ -57,9 +60,9 @@ namespace TrueWebPhone.Migrations
 
             modelBuilder.Entity("TrueWebPhone.Models.Customer", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -83,50 +86,39 @@ namespace TrueWebPhone.Migrations
 
             modelBuilder.Entity("TrueWebPhone.Models.Order", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int>("Cash")
                         .HasColumnType("int");
 
-                    b.Property<int>("Change")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Cash")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("Change")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("CreatedDate")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("StaffId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("SubTotal")
+                    b.Property<int>("StaffId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TaxFee")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TaxRate")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Total")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("Id");
 
@@ -179,62 +171,53 @@ namespace TrueWebPhone.Migrations
 
             modelBuilder.Entity("TrueWebPhone.Models.ProductOrder", b =>
                 {
-                    b.Property<string>("OrderId")
-                        .HasColumnType("varchar(255)");
+                    b.Property<int>("ProductOrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.HasKey("OrderId", "ProductId");
+                    b.Property<int>("ProductQuantity")
+                        .HasColumnType("int");
 
-                    b.HasIndex("ProductId");
+                    b.HasKey("ProductOrderId");
 
-                    b.ToTable("ProductOrder");
+                    b.ToTable("ProductOrders");
+                });
+
+            modelBuilder.Entity("TrueWebPhone.Models.Resend", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserMail")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Resends");
                 });
 
             modelBuilder.Entity("TrueWebPhone.Models.Order", b =>
                 {
-                    b.HasOne("TrueWebPhone.Models.Customer", "Customer")
+                    b.HasOne("TrueWebPhone.Models.Customer", null)
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("TrueWebPhone.Models.ProductOrder", b =>
-                {
-                    b.HasOne("TrueWebPhone.Models.Order", "Order")
-                        .WithMany("ProductOrders")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TrueWebPhone.Models.Product", "Product")
-                        .WithMany("ProductOrders")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("TrueWebPhone.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("TrueWebPhone.Models.Order", b =>
-                {
-                    b.Navigation("ProductOrders");
-                });
-
-            modelBuilder.Entity("TrueWebPhone.Models.Product", b =>
-                {
-                    b.Navigation("ProductOrders");
                 });
 #pragma warning restore 612, 618
         }

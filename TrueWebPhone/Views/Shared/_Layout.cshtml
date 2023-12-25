@@ -9,12 +9,19 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TrueWebPhone.styles.css" asp-append-version="true" />
     <style>
-        /* Custom styles */
+        .jumbotron h1 {
+            font-size: 3.5em; /* Increase heading font size */
+        }
+
+        .jumbotron p {
+            font-size: 2.5em; /* Increase paragraph font size */
+        }
         .jumbotron {
-            background-image: url('https://via.placeholder.com/1200x400'); /* Replace with your image URL */
+            background-image: url('https://cdn.ttgtmedia.com/visuals/ComputerWeekly/Hero%20Images/Apple-iphone12-max-PR-hero.jpg'); /* Replace with your image URL */
             background-size: cover;
             background-repeat: no-repeat;
             color: white;
+            border: 2px solid black;
             text-align: center;
             padding: 150px 0;
             margin-bottom: 0;
@@ -90,13 +97,13 @@
                                 <ul class="dropdown-menu" aria-labelledby="customerDropdown">
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="CustomerList">
-                                            <i class="fas fa-address-book"></i> <!-- Icon representing Customer Management -->
+                                            <i class="fas fa-address-book"></i> 
                                             Customer Management
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="CreateCustomer">
-                                            <i class="fas fa-user-plus"></i> <!-- Icon representing Adding a Customer -->
+                                            <i class="fas fa-user-plus"></i> 
                                             Add a Customer
                                         </a>
                                     </li>
@@ -136,8 +143,40 @@
         </nav>
     </header>
 
+    <div class="container">
+        <main role="main" class="pb-3">
+            <!-- Main content -->
+            <!-- Replace this area with your actual content -->
+            <div class="jumbotron">
+                <h1>Hello There!</h1>
+                <p>Welcome to TrueWebPhone</p>
+            </div>
+        </main>
+    </div>
+
 
     <style>
+        :root {
+            --main-bg-color: #f5f5f5;
+            --primary-color: #ff5e14;
+            --secondary-color: #f0f0f0;
+            --font-family: 'Arial', sans-serif;
+        }
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body and Typography */
+        body {
+            font-family: var(--font-family);
+            color: #333;
+            background-color: var(--main-bg-color);
+        }
+
         .navbar-nav .nav-link:hover {
             color: red;
             background-color: white;
@@ -152,15 +191,15 @@
 
         .nav-link {
             text-decoration: none;
-            color: #333; /* Set your desired text color */
+            color: #333; 
             padding: 10px;
         }
 
         .dropdown-menu {
             display: none;
             position: absolute;
-            background-color: #fff; /* Set your desired background color */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add shadow */
+            background-color: #fff; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); 
             z-index: 1;
             padding: 0;
         }
@@ -168,14 +207,14 @@
         .dropdown-item {
             display: block;
             padding: 8px 12px;
-            color: #333; /* Set your desired text color */
+            color: #333; 
             text-decoration: none;
             transition: background-color 0.3s ease;
         }
 
-            .dropdown-item:hover {
-                background-color: #e9ecef; /* Set your desired hover color */
-            }
+        .dropdown-item:hover {
+            background-color: #e9ecef; 
+        }
 
         .nav-item.dropdown:hover .dropdown-menu {
             display: block;
@@ -188,7 +227,9 @@
     </div>
 
     <footer class="border-top footer text-muted mt-5">
-        
+        <div class="container">
+            <p>&copy; 2023 TrueWebPhone. All Rights Reserved.</p>
+        </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
