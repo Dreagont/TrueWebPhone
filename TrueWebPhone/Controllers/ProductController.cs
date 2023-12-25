@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 using TrueWebPhone.Models;
 
 namespace TrueWebPhone.Controllers
@@ -48,6 +49,7 @@ namespace TrueWebPhone.Controllers
 
                 // Update the Product entity with the file path or relevant information
                 model.ImagePath = uniqueFileName;
+                model.Barcode = GenerateRandomBarcode();
 
                 // Save the Product entity to the database
                 ct.Products.Add(model);
@@ -60,7 +62,22 @@ namespace TrueWebPhone.Controllers
                 ModelState.AddModelError("ProductImage", "Please choose a file to upload.");
             }
             return View(model);
+        }
+        private string GenerateRandomBarcode()
+        {
+            const string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            StringBuilder barcode = new StringBuilder();
+            Random random = new Random();
+
+            for (int i = 0; i < 10; i++)
+            {
+                int index = random.Next(characters.Length);
+                barcode.Append(characters[index]);
             }
+
+            return barcode.ToString();
+        }
+
 
 
         [HttpGet]
