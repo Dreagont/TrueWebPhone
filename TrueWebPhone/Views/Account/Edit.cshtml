@@ -5,11 +5,11 @@
 }
 
 <div class="container mt-4">
-    <h1>Edit Account</h1>
+    <h1 class="text-center">Account Details</h1>
 
     <hr />
 
-    <div class="row">
+    <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="text-center">
                 <img src="~/@Model.Image" alt="User Image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
@@ -23,45 +23,43 @@
 
                 <div class="form-group">
                     <label asp-for="Email" class="control-label">Email:</label>
-                    <input asp-for="Email" class="form-control" />
+                    <input asp-for="Email" class="form-control" readonly/>
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Username" class="control-label">Username:</label>
-                    <input asp-for="Username" class="form-control" />
+                    <input asp-for="Username" class="form-control" readonly />
                     <span asp-validation-for="Username" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Name" class="control-label">Name:</label>
-                    <input asp-for="Name" class="form-control" />
+                    <input asp-for="Name" class="form-control" readonly/>
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Role" class="control-label">Role:</label>
-                    <input asp-for="Role" class="form-control" />
+                    <input asp-for="Role" class="form-control" readonly/>
                     <span asp-validation-for="Role" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="Status" class="control-label">Status:</label>
-                    <input asp-for="Status" class="form-control" />
+                    <input asp-for="Status" class="form-control" readonly/>
                     <span asp-validation-for="Status" class="text-danger"></span>
                 </div>
 
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="form-group text-center mt-3">
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
                 </div>
             </form>
         </div>
     </div>
-
-    <div>
-        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-    </div>
 </div>
+
+
 
 @section Scripts {
     @{

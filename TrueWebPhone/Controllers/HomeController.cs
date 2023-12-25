@@ -104,6 +104,27 @@ namespace TrueWebPhone.Controllers
             }
         }
 
+        public IActionResult DeTails(int id)
+        {
+            if (id == null) return RedirectToAction("Index");
+            Customer customer = ct.Customers.Where(x => x.Id == id).FirstOrDefault();
+
+            return View(customer);
+        }
+
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var customer = ct.Customers.FirstOrDefault(p => p.Id == id);
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return View(customer);
+        }
+
 
 
 
@@ -136,6 +157,39 @@ namespace TrueWebPhone.Controllers
 
                 return Json(result);
             }
+        }
+
+        [AllowAnonymous]
+        public IActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var customer = ct.Customers.FirstOrDefault(m => m.Id == id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return View("Delete", customer);
+        }
+
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var customer = ct.Customers.FirstOrDefault(m => m.Id == id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            ct.Customers.Remove(customer);
+            ct.SaveChanges();
+
+            return RedirectToAction(nameof(CustomerList));
         }
 
         [HttpPost]

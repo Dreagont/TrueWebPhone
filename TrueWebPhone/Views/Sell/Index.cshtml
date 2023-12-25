@@ -194,12 +194,14 @@
     <main>
         <div id="product">
             <h2>Product List</h2>
+            <input type="text" id="searchInput" placeholder="Search by name or barcode...">
             <div id="product-list">
                 @foreach (var product in Model)
                 {
                     <div class="product-item" data-product-id="@product.Id">
                         <img src="~/uploads/@product.ImagePath" alt="@product.ProductName">
                         <p>@product.ProductName - $@product.RetailPrice.ToString("0.##")</p>
+                        <p hidden>@product.Barcode</p>
                         <button class="add-to-cart-btn">Add to Cart</button>
                     </div>
                 }
@@ -220,6 +222,10 @@
             <div class="flex-row">
                 <label for="customer-payment">Customer Payment:</label>
                 <input type="text" id="customer-payment" name="customer-payment" placeholder="Enter amount">
+            </div>
+
+            <div class="flex-row">
+                <p id="change-output">Customer's Change: $0.00</p>
             </div>
             <button type="button" class="btn btn-primary" id="openCustomerModalBtn">
                 Make a payment
@@ -296,10 +302,10 @@
                                     </button>
                                 </div>
                                 <div class="modal-body">
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 </body>
 </html>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -402,10 +408,48 @@
 
     $(document).ready(function () 
     {
+        $("#searchInput").on("input", function () {
+            var searchText = $(this).val().toLowerCase().trim();
+
+            $(".product-item").each(function () {
+                var productName = $(this).find("p").eq(0).text().toLowerCase();
+                var productBarcode = $(this).find("p").eq(1).text().toLowerCase();
+
+                if (productName.includes(searchText) || productBarcode.includes(searchText)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
 
         $("#openCustomerModalBtn").on("click", function () {
             $("#customerModal").modal("show");
+            $('#openCustomerModalBtn').on('click', function () {
+                calculateChange();
+            });
         });
+        $("#customer-payment").on("input", function () {
+            calculateChange();
+        });
+
+        function calculateChange() {
+            // Get the total price
+            var totalPrice = parseFloat($("#total-price-text").text().replace('Total Price: $', ''));
+
+            // Get the customer payment and convert it to a number
+            var customerPayment = parseFloat($("#customer-payment").val());
+
+            // Calculate the change
+            var change = customerPayment - totalPrice;
+
+            // Display the change in the console or wherever you want to show it
+            console.log("Customer's Change: $" + change.toFixed(2));
+
+            // You can display the change in a specific element if needed
+            // Example:
+            $("#change-output").text("Customer's Change: $" + change.toFixed(2));
+        }
 
         $("#reset-cart-btn").on("click", function () {
             $("#cart-details").empty(); 
@@ -434,13 +478,12 @@
         });
        
         $(".add-to-cart-btn").on("click", function () {
-            var productInfo = $(this).siblings("p").text();
-            var productPrice = parseFloat(productInfo.match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1]);
-            var productName = productInfo.replace(/\s*\-\s*\$[0-9,]+(\.[0-9]{1,2})?/, "");
+            var productInfo = $(this).siblings("p");
+            var productPriceText = productInfo.eq(0).text().trim(); // Get the text containing the price
+            var productPrice = parseFloat(productPriceText.match(/\$([0-9,]+(?:\.[0-9]{1,2})?)/)[1].replace(',', '')); // Extract the price value
+            var productName = productInfo.eq(0).text().split('-')[0].trim(); // Extract product name
             var productImage = $(this).siblings("img").attr("src");
             var productId = $(this).closest('.product-item').data('product-id');
-
-
 
             var existingCartItem = $(".cart-item").filter(function () {
                 return $(this).find('.product-name').text().includes(productName);
@@ -454,9 +497,10 @@
                     '<div class="cart-item">' +
                     '<img src="' + productImage + '" alt="' + productName + '" style="width: 3cm; height: 2cm;">' +
                     '<div>' +
-                    '<p class="product-name">' + productName + ' - $' + productPrice.toFixed(2) + '</p>' +
-                    '<p class="quantity">1</p>' + 
-                    '<p class = "product-id" hidden>' + productId + '</p>' +
+                    '<p class="product-name">' + productName + '</p>' +
+                    '<p class="product-price">$' + productPrice.toFixed(2) + '</p>' +
+                    '<p class="quantity">1</p>' +
+                    '<p class="product-id" hidden>' + productId + '</p>' +
                     '</div>' +
                     '<span class="delete-icon" onclick="removeCartItem(this)">&#128465;</span>' +
                     '</div>'
@@ -464,6 +508,7 @@
             }
             updateCartTotals();
         });
+
         $("#checkout-btn").on("click", function () {
             var cartItems = [];
 
@@ -530,11 +575,17 @@
 
         $(".cart-item").each(function () {
             var quantity = parseInt($(this).find('.quantity').text());
-            var priceText = $(this).find('.product-name').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
-            var itemPrice = parseFloat(priceText);
-            
-            totalItems += quantity;
-            totalPrice += itemPrice * quantity;
+            var priceText = $(this).find('.product-price').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/);
+
+            if (priceText && priceText[1]) {
+                var formattedPrice = priceText[1].replace(/,/g, ''); // Remove commas
+                var retailPrice = parseFloat(formattedPrice);
+
+                if (!isNaN(retailPrice)) {
+                    totalPrice += retailPrice * quantity; // Calculate total price based on the retail price
+                    totalItems += quantity;
+                }
+            }
         });
 
         $("#total-items-text").text("Total Items: " + totalItems);
@@ -575,6 +626,22 @@
             error: function (error) {
                 console.error("Error creating bill:", error);
             }
+        });
+        var totalPrice = 0;
+        $(".cart-item").each(function () {
+            var quantity = parseInt($(this).find('.quantity').text());
+            var priceText = $(this).find('.product-name').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
+            var itemPrice = parseFloat(priceText);
+
+            totalPrice += itemPrice * quantity;
+        });
+
+        $(".cart-item").each(function () {
+            var quantity = parseInt($(this).find('.quantity').text());
+            var priceText = $(this).find('.product-name').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
+            var retailPrice = parseFloat(priceText);
+
+            totalPrice += retailPrice * quantity; // Calculate total price based on the retail price
         });
     }
 </script>

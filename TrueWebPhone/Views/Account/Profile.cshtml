@@ -13,10 +13,7 @@
                 <img src="~/@Model.Image" alt="User Image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
             </div>
 
-            <dl class="row justify-content-center mt-4">
-                <dt class="col-sm-3 text-right">ID:</dt>
-                <dd class="col-sm-9 text-left">@Model.Id</dd>
-
+            <dl class="row justify-content-center mt-4">             
                 <dt class="col-sm-3 text-right">Username:</dt>
                 <dd class="col-sm-9 text-left">@Model.Username</dd>
 
@@ -27,23 +24,22 @@
                 <dd class="col-sm-9 text-left">@Model.Name</dd>
 
                 <dt class="col-sm-3 text-right">Role:</dt>
-                <dd class="col-sm-9 text-left">@Model.Role</dd>
-
-                <dt class="col-sm-3 text-right">Status:</dt>
-                <dd class="col-sm-9 text-left">@Model.Status</dd>
+                <dd class="col-sm-9 text-left">@Model.Role</dd>               
             </dl>
 
+            <div class="text-center mt-4">              
+                <a asp-action="ChangePassword" asp-route-id="@Model.Id" class="btn btn-warning ml-2">Change Password</a>                               
+            </div>
+
             <div class="text-center mt-4">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit Profile</a>
-
-                <a asp-action="ChangePassword" asp-route-id="@Model.Id" class="btn btn-warning ml-2">Change Password</a>
-
                 <form asp-action="ChangePicture" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
                     <input type="file" name="newPicture" accept="image/*" style="display: none;" id="fileInput" />
                     <label for="fileInput" class="btn btn-info ml-2">Change Picture</label>
                     <button type="submit" class="btn btn-success ml-2" style="display: none;">Save</button>
                 </form>
+            </div>
 
+            <div class="text-center mt-4">
                 <a asp-action="Logout" class="btn btn-danger ml-2">Logout</a>
             </div>
         </div>
