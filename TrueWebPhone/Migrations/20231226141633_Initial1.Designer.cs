@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TrueWebPhone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231225172418_v1")]
-    partial class v1
+    [Migration("20231226141633_Initial1")]
+    partial class Initial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

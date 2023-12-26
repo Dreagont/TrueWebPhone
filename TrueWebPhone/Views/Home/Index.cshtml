@@ -1,3 +1,24 @@
-﻿<div>
-    <h3>Profit: @ViewData["Profit"]</h3>
+﻿<div style="text-align: center; margin-top: 20px;">
+    <h2>Business Overview</h2>
+    <hr style="border: 1px solid #ddd; width: 50%; margin: 10px auto;">
+
+    <div style="display: flex; justify-content: space-around;">
+        @if (User.IsInRole("Admin"))
+        {
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; flex: 1; margin-right: 10px;">
+                <h3>Total Profit</h3>
+                <p style="font-size: 24px; color: green;">@ViewData["Profit"]</p>
+            </div>
+        }
+
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; flex: 1; margin-left: 10px;">
+            <h3>Total Products</h3>
+            <p style="font-size: 24px; color: blue;">@ViewData["TotalSoldProducts"]</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <h3>Total Orders</h3>
+        <p style="font-size: 24px; color: orange;">@ViewData["TotalOrders"]</p>
+    </div>
 </div>

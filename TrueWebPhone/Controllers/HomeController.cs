@@ -21,26 +21,28 @@ namespace TrueWebPhone.Controllers
         }
 
         [Authorize(Roles = "Admin , Seller")]
+        [Authorize(Roles = "Admin , Seller")]
         public IActionResult Index()
         {
             try
             {
-                // Get the total amount of all orders
                 decimal totalOrderAmount = ct.Orders.Sum(order => order.Total);
 
-                // Get the total cost of sold products
                 decimal totalProductCost = ct.ProductOrders
                     .Join(ct.Products, po => po.ProductId, p => p.Id, (po, p) => new { po, p })
                     .Sum(item => item.po.ProductQuantity * item.p.ImportPrice);
 
-                // Calculate profit
                 decimal profit = totalOrderAmount - totalProductCost;
 
-                // Format profit as currency
                 string formattedProfit = profit.ToString("C");
 
-                // Pass the formatted profit to the view
+                int totalOrders = ct.Orders.Count();
+
+                int totalSoldProducts = ct.Products.Count();
+
                 ViewData["Profit"] = formattedProfit;
+                ViewData["TotalOrders"] = totalOrders;
+                ViewData["TotalSoldProducts"] = totalSoldProducts;
 
                 return View();
             }
@@ -52,7 +54,7 @@ namespace TrueWebPhone.Controllers
             }
         }
 
-        [AllowAnonymous]
+    [AllowAnonymous]
         public async Task<IActionResult> CustomerList()
         {
 

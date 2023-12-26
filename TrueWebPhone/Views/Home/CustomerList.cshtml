@@ -3,10 +3,16 @@
 @{
     ViewData["Title"] = "CustomerList";
 }
+<style>
+    .btn-group .btn {
+        margin-right: 5px; /* Adjust the margin to your preference */
+    }
+</style>
+
 
 <h1>CustomerList</h1>
 
-<form asp-controller="Home" asp-action="Search" method="get">   
+<form asp-controller="Home" asp-action="Search" method="get">
     <div class="input-group mb-3">
         <input type="text" class="form-control" name="searchString" id="searchString" placeholder="Enter customer information">
     </div>
@@ -40,10 +46,13 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Address)
                 </td>
-                <td>                  
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <td>
+                    <div class="btn-group" role="group" aria-label="Customer Actions">
+                        <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </div>
                 </td>
+
             </tr>
         }
     </tbody>
