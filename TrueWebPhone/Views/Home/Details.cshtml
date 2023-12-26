@@ -1,0 +1,33 @@
+﻿@model TrueWebPhone.Models.Customer
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1 class="text-center">Customer Details</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <table class="table table-bordered">               
+                <tr>
+                    <th>Name</th>
+                    <td>@Html.DisplayFor(model => model.Name)</td>
+                </tr>
+                <tr>
+                    <th>Phone</th>
+                    <td>@Html.DisplayFor(model => model.Phone)</td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td>@Html.DisplayFor(model => model.Address)</td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("CustomerList")'">Back to List</button>
+        </div>
+    </div>
+</div>
+
+

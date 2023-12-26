@@ -24,7 +24,13 @@ namespace TrueWebPhone.Models
         public IFormFile? AccountImage { get; set; }
         public string? Role { get; set; }
         public string? Status { get; set; }
-
+        public bool? IsBlocked { get; set; }
         public bool isChangePass { get; set; }
+
+        public Account()
+        {
+            IsBlocked = false;
+        }
+
     }
 }

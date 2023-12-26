@@ -7,14 +7,9 @@
 <div class="container mt-4">
     <h1>Product Management Page</h1>
 
-    <form asp-action="Search" method="get">
+    <form asp-action="Search" method="get">       
         <div class="input-group mb-3">
-            <div class="input-group-append">
-                <button class="btn btn-primary" type="submit">Search Product</button>
-            </div>
-        </div>
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" name="searchString" id="searchString" placeholder="Enter product information">
+            <input type="text" class="form-control" name="searchString" id="searchString" placeholder="Enter product information to search">
         </div>
     </form>
 
@@ -25,13 +20,13 @@
     <table class="table table-bordered" id="productTable">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(model => model.ProductName)</th>
+                <th>Product Name</th>
                 <th>@Html.DisplayNameFor(model => model.Barcode)</th>
-                <th>@Html.DisplayNameFor(model => model.ImportPrice)</th>
-                <th>@Html.DisplayNameFor(model => model.RetailPrice)</th>
+                <th>Import Price</th>
+                <th>Retail Price</th>
                 <th>@Html.DisplayNameFor(model => model.Category)</th>
-                <th>CreationDate</th>
-                <th>CreationTime</th>
+                <th>Creation Date</th>
+                <th>Creation Time</th>
                 <th>Actions</th>
             </tr>
         </thead>

@@ -6,20 +6,11 @@
 
 <h1>CustomerList</h1>
 
-<form asp-controller="Home" asp-action="Search" method="get">
-    <div class="input-group mb-3">
-        <div class="input-group-append">
-            <button type="submit" class="btn btn-primary">Search Customer</button>
-        </div>
-    </div>
+<form asp-controller="Home" asp-action="Search" method="get">   
     <div class="input-group mb-3">
         <input type="text" class="form-control" name="searchString" id="searchString" placeholder="Enter customer information">
     </div>
 </form>
-
-<p>
-    <a class="btn btn-primary" asp-action="CreateCustomer">Create New</a>
-</p>
 
 <table class="table" id="customerTable">
     <thead>
@@ -49,8 +40,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Address)
                 </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <td>                  
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </td>
