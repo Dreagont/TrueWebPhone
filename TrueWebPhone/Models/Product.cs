@@ -44,5 +44,6 @@ namespace TrueWebPhone.Models
                 yield return new ValidationResult("Import Price must be lower than Retail Price.", new[] { nameof(ImportPrice), nameof(RetailPrice) });
             }
         }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using TrueWebPhone.Models;
 
 namespace TrueWebPhone.Controllers
@@ -21,10 +22,10 @@ namespace TrueWebPhone.Controllers
             return View(products);
         }
 
-        public IActionResult Orders()
+        public IActionResult AllOrders()
         {
-            var order = _dbContext.Orders.ToList();
-            return View(order);
+            var orders = _dbContext.Orders.ToList();
+            return View(orders);
         }
 
         public IActionResult Details(int id)
@@ -46,8 +47,55 @@ namespace TrueWebPhone.Controllers
                 sellerName = seller.Name,
             };
 
-            return View("Details", details); 
+            return View("Details", details);
         }
+
+        public IActionResult Delete(int id)
+        {
+            var order = _dbContext.Orders.FirstOrDefault(a => a.Id == id);
+
+            if (order == null)
+            {
+                return NotFound(); 
+            }
+
+            return View(order);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var order = _dbContext.Orders.FirstOrDefault(a => a.Id == id);
+
+            if (order == null)
+            {
+                return NotFound(); 
+            }
+
+            _dbContext.Orders.Remove(order);
+            _dbContext.SaveChanges();
+
+            return RedirectToAction(nameof(Orders));
+        }
+
+        public IActionResult Orders(string start, string end)
+        {
+            IQueryable<Order> query = _dbContext.Orders.AsQueryable();
+
+            if (!string.IsNullOrEmpty(start) && !string.IsNullOrEmpty(end))
+            {
+                DateTime parsedStart = DateTime.ParseExact(start, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                DateTime parsedEnd = DateTime.ParseExact(end, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                query = query.Where(o => DateTime.ParseExact(o.CreatedDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) >= parsedStart &&
+                                          DateTime.ParseExact(o.CreatedDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) <= parsedEnd);
+            }
+
+            var orders = query.ToList();
+            return View(orders);
+        }
+
 
     }
 }

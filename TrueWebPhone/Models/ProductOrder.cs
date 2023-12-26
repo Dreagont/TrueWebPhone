@@ -13,6 +13,5 @@ namespace TrueWebPhone.Models
         public int ProductId { get; set; }
         public int ProductQuantity { get; set; }
 
-
     }
 }
