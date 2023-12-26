@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TrueWebPhone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231225102946_Initial1")]
-    partial class Initial1
+    [Migration("20231225172418_v1")]
+    partial class v1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace TrueWebPhone.Migrations
 
                     b.Property<string>("Image")
                         .HasColumnType("longtext");
+
+                    b.Property<bool?>("IsBlocked")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .HasColumnType("longtext");

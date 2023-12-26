@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TrueWebPhone.Migrations
 {
     /// <inheritdoc />
-    public partial class v3 : Migration
+    public partial class v1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,6 +35,7 @@ namespace TrueWebPhone.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsBlocked = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     isChangePass = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>

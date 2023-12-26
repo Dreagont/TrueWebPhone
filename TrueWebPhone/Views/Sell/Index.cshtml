@@ -63,7 +63,8 @@
             grid-template-columns: repeat(4, 1fr);
             grid-gap: 20px;
         }
-        #product{
+
+        #product {
             width: 60%;
             background-color: #fff;
             padding: 20px;
@@ -81,7 +82,8 @@
 
         #product-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive grid */
+            gap: 20px;
         }
 
         .product-item {
@@ -92,10 +94,10 @@
             transition: transform 0.3s ease-in-out;
         }
 
-        .product-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-         }
+            .product-item:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
 
         img {
             max-width: 100%;
@@ -166,7 +168,7 @@
             color: white;
             text-align: center;
             padding: 20px 0;
-            z-index: 999; 
+            z-index: 999; /* Ensure the footer stays on top */
         }
 
         #total-items-text {
@@ -180,26 +182,25 @@
         }
 
         .text-start {
-            order: 1; 
+            order: 1;
         }
 
         .text-end {
-            order: 2; 
+            order: 2;
         }
     </style>
 </head>
 <body>
+
     <main>
         <div id="product">
             <h2>Product List</h2>
-            <input type="text" id="searchInput" placeholder="Search by name or barcode...">
             <div id="product-list">
                 @foreach (var product in Model)
                 {
                     <div class="product-item" data-product-id="@product.Id">
                         <img src="~/uploads/@product.ImagePath" alt="@product.ProductName">
                         <p>@product.ProductName - $@product.RetailPrice.ToString("0.##")</p>
-                        <p hidden>@product.Barcode</p>
                         <button class="add-to-cart-btn">Add to Cart</button>
                     </div>
                 }
@@ -210,7 +211,7 @@
             <h2>Shopping Cart</h2>
 
             <div id="cart-details" style="height:300px">
-                
+                <!-- Cart details will be displayed here -->
             </div>
 
             <div class="flex-row">
@@ -221,7 +222,6 @@
                 <label for="customer-payment">Customer Payment:</label>
                 <input type="text" id="customer-payment" name="customer-payment" placeholder="Enter amount">
             </div>
-
             <div class="flex-row">
                 <p id="change-output">Customer's Change: $0.00</p>
             </div>
@@ -229,13 +229,13 @@
                 Make a payment
             </button>
             <button id="reset-cart-btn" type="button" class="btn btn-success">Reset Cart</button>
+
         </div>
+
     </main>
 
     <footer>
-        
     </footer>
-
     <div class="modal fade" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -247,72 +247,118 @@
                 </div>
                 <div class="modal-body">
                     <form id="checkoutForm" method="post">
-                        
+                        <div class="row">
+                            <div class="col">
+                                <label>Phone number</label>
+                                <input type="text" class="form-control" id="phone" placeholder="Enter phone's customer" name="phone" />
+                                <button type="submit" class="my-2 btn btn-primary">Checkout <i class="fa-solid fa-check-to-slot"></i></button>
+                            </div>
+                            <div class="col">
+                                <label>Full name</label>
+                                <input type="text" class="form-control" placeholder="Enter customer's name" id="fullname" name="fullname" />
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <label>Address</label>
+                                <input type="text" class="form-control" placeholder="Enter customer's address" id="address" name="address" />
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col">
+                                <label for="payment-method">Payment Method:</label>
+                                <select class="form-control" id="payment-method" name="payment-method">
+                                    <option value="cash">Cash</option>
+                                    <option value="visa">Visa</option>
+                                    <option value="momo">Momo</option>
+                                </select>
+                            </div>
+                        </div>
                     </form>
 
                     <div id="messageContainer" class="mt-3"></div>
 
                     <div id="existingCustomerInfo" style="display:none;">
-                        
+                        <p>Customer with the provided phone number already exists.</p>
+                        <p>Name: <span id="existingName"></span></p>
+                        <p>Address: <span id="existingAddress"></span></p>
                     </div>
 
                     <button id="addNewCustomer" class="btn btn-success mt-3">Add New Customer</button>
                     <button class="btn btn-success mt-3" id="checkout-btn">Pay</button>
                     <button class="btn btn-success mt-3" id="reset-customer-btn">Reset Customer</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
 
+
+                    <div class="modal fade" id="invoiceModal" tabindex="-1" role="dialog" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="invoiceModalLabel">Invoice Details</h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Customer Name:</strong> <span id="customerName"></span></p>
+                                    <p><strong>Customer Phone:</strong> <span id="customerPhone"></span></p>
+                                    <p><strong>Customer Address:</strong> <span id="customerAddress"></span></p>
+                                    <p><strong>Staff Name:</strong> <span id="staffName"></span></p>
+                                    <h4>Order Details</h4>
+                                    <table class="table" id="orderDetailsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Total Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                    <button id="download-pdf-btn" class="btn btn-primary">Download as PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+</body>
 </html>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 <script src="https://unpkg.com/html2pdf.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.debug.js"></script>
 <script>
     function displayInvoiceModal(invoiceDetails) {
-        // Generate HTML for displaying invoice details
-        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
-            '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
-            '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
-            '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
-            '<h4>Order Details</h4>' +
-            '<table class="table">' +
-            '<thead>' +
-            '<tr>' +
-            '<th>Product Name</th>' +
-            '<th>Quantity</th>' +
-            '<th>Total Price</th>' +
-            '</tr>' +
-            '</thead>' +
-            '<tbody>';
+        $("#customerName").text(invoiceDetails.customerName);
+        $("#customerPhone").text(invoiceDetails.customerPhone);
+        $("#customerAddress").text(invoiceDetails.customerAddress);
+        $("#staffName").text(invoiceDetails.staffName);
 
+        var orderDetailsHtml = "";
         for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
             var orderDetail = invoiceDetails.orderDetails[i];
-            invoiceHtml += '<tr>' +
+            orderDetailsHtml += '<tr>' +
                 '<td>' + orderDetail.productName + '</td>' +
                 '<td>' + orderDetail.quantity + '</td>' +
                 '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
                 '</tr>';
         }
+        $("#orderDetailsTable tbody").html(orderDetailsHtml);
 
-        invoiceHtml += '</tbody></table>';
-
-        invoiceHtml += '<button id="download-pdf-btn">Download as PDF</button>';
-
-        // Update modal content with invoice details
-        $("#invoiceModal").find(".modal-body").html(invoiceHtml);
-
-        // Show the modal
-        $("#invoiceModal").modal("show");
-
-        $("#download-pdf-btn").on("click", function () {
-            downloadPDF(invoiceDetails);
+        $("#invoiceModal").modal("show").on('shown.bs.modal', function () {
+            $("#download-pdf-btn").on("click", function () {
+                downloadPDF(invoiceDetails, function () {
+                    $("#invoiceModal").modal("hide");
+                });
+            });
         });
-
     }
-
 
     function downloadPDF(invoiceDetails) {
         if (!invoiceDetails || !invoiceDetails.orderDetails) {
@@ -320,77 +366,60 @@
             return;
         }
 
-        // Generate HTML for displaying invoice details
-        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
-            '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
-            '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
-            '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
-            '<h4>Order Details</h4>' +
-            '<table class="table">' +
-            '<thead>' +
-            '<tr>' +
-            '<th>Product Name</th>' +
-            '<th>Quantity</th>' +
-            '<th>Total Price</th>' +
-            '</tr>' +
-            '</thead>' +
-            '<tbody>';
+        var pdfDoc = new jsPDF();
 
+        var currentDate = new Date().toLocaleDateString();
+        var currentTime = new Date().toLocaleTimeString();
+
+        pdfDoc.text(`Date: ${currentDate}`, 10, 10);
+        pdfDoc.text(`Time: ${currentTime}`, 10, 20);
+        pdfDoc.text(`Customer Name: ${invoiceDetails.customerName}`, 10, 30);
+        pdfDoc.text(`Customer Phone: ${invoiceDetails.customerPhone}`, 10, 40);
+        pdfDoc.text(`Customer Address: ${invoiceDetails.customerAddress}`, 10, 50);
+        pdfDoc.text(`Staff Name: ${invoiceDetails.staffName}`, 10, 60);
+        pdfDoc.text('Order Details', 10, 80);
+
+        var yPosition = 90;
         for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
             var orderDetail = invoiceDetails.orderDetails[i];
-            invoiceHtml += '<tr>' +
-                '<td>' + orderDetail.productName + '</td>' +
-                '<td>' + orderDetail.quantity + '</td>' +
-                '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
-                '</tr>';
+            pdfDoc.text(orderDetail.productName, 10, yPosition);
+            pdfDoc.text(`Quantity: ${orderDetail.quantity}`, 80, yPosition);
+            pdfDoc.text(`Total Price: $${orderDetail.totalPrice.toFixed(2)}`, 120, yPosition);
+            yPosition += 20;
         }
 
-        invoiceHtml += '</tbody></table>';
+        var totalAmount = invoiceDetails.orderDetails.reduce((total, item) => total + item.totalPrice, 0);
+        var customerPayment = parseFloat($("#customer-payment").val()) || 0;
+        var change = customerPayment - totalAmount;
 
-        // Create a new HTML element with the invoice content
-        var invoiceElement = document.createElement("div");
-        invoiceElement.innerHTML = invoiceHtml;
+        pdfDoc.text(`Total Amount: $${totalAmount.toFixed(2)}`, 10, yPosition + 20);
+        pdfDoc.text(`Customer Payment: $${customerPayment.toFixed(2)}`, 10, yPosition + 30);
+        pdfDoc.text(`Change: $${change.toFixed(2)}`, 10, yPosition + 40);
 
-        // Use html2pdf to generate the PDF
-        html2pdf(invoiceElement, {
-            margin: 10,
-            filename: 'invoice.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        });
+        pdfDoc.save('invoice.pdf');
     }
 
 
 
 
-    $(document).ready(function () 
-    {
-        $("#searchInput").on("input", function () {
-            var searchText = $(this).val().toLowerCase().trim();
 
-            $(".product-item").each(function () {
-                var productName = $(this).find("p").eq(0).text().toLowerCase();
-                var productBarcode = $(this).find("p").eq(1).text().toLowerCase();
 
-                if (productName.includes(searchText) || productBarcode.includes(searchText)) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-            });
-        });
+    $(document).ready(function () {
 
         $("#openCustomerModalBtn").on("click", function () {
             $("#customerModal").modal("show");
-            $('#openCustomerModalBtn').on('click', function () {
-                calculateChange();
-            });
-        });
-        $("#customer-payment").on("input", function () {
-            calculateChange();
         });
 
+        $("#reset-cart-btn").on("click", function () {
+            $("#cart-details").empty();
+            updateCartTotals();
+        });
+
+        $("#reset-customer-btn").on("click", function () {
+            $("#checkoutForm")[0].reset();
+            $("#messageContainer").empty();
+            $("#existingCustomerInfo").hide();
+        });
         function calculateChange() {
             // Get the total price
             var totalPrice = parseFloat($("#total-price-text").text().replace('Total Price: $', ''));
@@ -409,17 +438,9 @@
             $("#change-output").text("Customer's Change: $" + change.toFixed(2));
         }
 
-        $("#reset-cart-btn").on("click", function () {
-            $("#cart-details").empty(); 
-            updateCartTotals(); 
+        $("#customer-payment").on("input", function () {
+            calculateChange();
         });
-
-        $("#reset-customer-btn").on("click", function () {
-            $("#checkoutForm")[0].reset(); 
-            $("#messageContainer").empty(); 
-            $("#existingCustomerInfo").hide(); 
-        });
-
 
         $("#checkoutForm").submit(function (event) {
             event.preventDefault();
@@ -433,15 +454,17 @@
                     showMessage("Customer does not exist. Create a new one.", 'red');
                 }
             });
+            calculateChange();
         });
-       
+
         $(".add-to-cart-btn").on("click", function () {
-            var productInfo = $(this).siblings("p");
-            var productPriceText = productInfo.eq(0).text().trim(); // Get the text containing the price
-            var productPrice = parseFloat(productPriceText.match(/\$([0-9,]+(?:\.[0-9]{1,2})?)/)[1].replace(',', '')); // Extract the price value
-            var productName = productInfo.eq(0).text().split('-')[0].trim(); // Extract product name
+            var productInfo = $(this).siblings("p").text();
+            var productPrice = parseFloat(productInfo.match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1]);
+            var productName = productInfo.replace(/\s*\-\s*\$[0-9,]+(\.[0-9]{1,2})?/, "");
             var productImage = $(this).siblings("img").attr("src");
             var productId = $(this).closest('.product-item').data('product-id');
+
+
 
             var existingCartItem = $(".cart-item").filter(function () {
                 return $(this).find('.product-name').text().includes(productName);
@@ -455,10 +478,9 @@
                     '<div class="cart-item">' +
                     '<img src="' + productImage + '" alt="' + productName + '" style="width: 3cm; height: 2cm;">' +
                     '<div>' +
-                    '<p class="product-name">' + productName + '</p>' +
-                    '<p class="product-price">$' + productPrice.toFixed(2) + '</p>' +
+                    '<p class="product-name">' + productName + ' - $' + productPrice.toFixed(2) + '</p>' +
                     '<p class="quantity">1</p>' +
-                    '<p class="product-id" hidden>' + productId + '</p>' +
+                    '<p class = "product-id" hidden>' + productId + '</p>' +
                     '</div>' +
                     '<span class="delete-icon" onclick="removeCartItem(this)">&#128465;</span>' +
                     '</div>'
@@ -466,7 +488,6 @@
             }
             updateCartTotals();
         });
-
         $("#checkout-btn").on("click", function () {
             var cartItems = [];
 
@@ -494,7 +515,7 @@
             var customerPhone = $("#phone").val();
             var customerPayment = parseFloat($("#customer-payment").val()) || 0;
             createBill(cartItems, customerPayment, customerPhone);
-            d
+
         });
         $("#addNewCustomer").click(function () {
             var phone = $("#phone").val();
@@ -514,12 +535,12 @@
             $("#messageContainer").text(message).css('color', color);
         }
 
-        
+
     });
 
     function removeCartItem(element) {
         if (parseInt($(element).closest(".cart-item").find('.quantity').text()) > 1) {
-            $(element).closest(".cart-item").find('.quantity').text( parseInt($(element).closest(".cart-item").find('.quantity').text()) - 1 );
+            $(element).closest(".cart-item").find('.quantity').text(parseInt($(element).closest(".cart-item").find('.quantity').text()) - 1);
         } else {
             $(element).closest(".cart-item").remove();
         }
@@ -533,17 +554,11 @@
 
         $(".cart-item").each(function () {
             var quantity = parseInt($(this).find('.quantity').text());
-            var priceText = $(this).find('.product-price').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/);
+            var priceText = $(this).find('.product-name').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
+            var itemPrice = parseFloat(priceText);
 
-            if (priceText && priceText[1]) {
-                var formattedPrice = priceText[1].replace(/,/g, ''); // Remove commas
-                var retailPrice = parseFloat(formattedPrice);
-
-                if (!isNaN(retailPrice)) {
-                    totalPrice += retailPrice * quantity; // Calculate total price based on the retail price
-                    totalItems += quantity;
-                }
-            }
+            totalItems += quantity;
+            totalPrice += itemPrice * quantity;
         });
 
         $("#total-items-text").text("Total Items: " + totalItems);
@@ -575,35 +590,16 @@
             success: function (response) {
                 console.log("Bill created successfully:", response);
                 if (response.success) {
-                    // Display the invoice modal
-                    console.log("ok");
                     displayInvoiceModal(response.invoiceDetails);
                 }
-               
+
             },
             error: function (error) {
                 console.error("Error creating bill:", error);
             }
         });
-        var totalPrice = 0;
-        $(".cart-item").each(function () {
-            var quantity = parseInt($(this).find('.quantity').text());
-            var priceText = $(this).find('.product-name').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
-            var itemPrice = parseFloat(priceText);
-
-            totalPrice += itemPrice * quantity;
-        });
-
-        $(".cart-item").each(function () {
-            var quantity = parseInt($(this).find('.quantity').text());
-            var priceText = $(this).find('.product-name').text().match(/\$([0-9,]+(\.[0-9]{1,2})?)/)[1];
-            var retailPrice = parseFloat(priceText);
-
-            totalPrice += retailPrice * quantity; // Calculate total price based on the retail price
-        });
     }
 </script>
-
 
 
 
