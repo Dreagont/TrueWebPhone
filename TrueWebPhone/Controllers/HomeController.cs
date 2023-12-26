@@ -273,8 +273,7 @@ namespace TrueWebPhone.Controllers
                             product.IsSelled = true;
                         }
 
-                        // Update the product quantity
-                        var product = ct.Products.FirstOrDefault(p => p.Id == cartItem.ProductId);
+                        // Update the product quantity                       
                         if (product != null)
                         {
                             product.Quantity -= cartItem.Quantity;
