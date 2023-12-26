@@ -20,11 +20,36 @@ namespace TrueWebPhone.Controllers
             this.ct = ct;
         }
 
-
-
+        [Authorize(Roles = "Admin , Seller")]
         public IActionResult Index()
         {
-            return View();
+            try
+            {
+                // Get the total amount of all orders
+                decimal totalOrderAmount = ct.Orders.Sum(order => order.Total);
+
+                // Get the total cost of sold products
+                decimal totalProductCost = ct.ProductOrders
+                    .Join(ct.Products, po => po.ProductId, p => p.Id, (po, p) => new { po, p })
+                    .Sum(item => item.po.ProductQuantity * item.p.ImportPrice);
+
+                // Calculate profit
+                decimal profit = totalOrderAmount - totalProductCost;
+
+                // Format profit as currency
+                string formattedProfit = profit.ToString("C");
+
+                // Pass the formatted profit to the view
+                ViewData["Profit"] = formattedProfit;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions appropriately
+                ViewData["ErrorMessage"] = "An error occurred while calculating profit.";
+                return View("Error");
+            }
         }
 
         [AllowAnonymous]
@@ -188,6 +213,13 @@ namespace TrueWebPhone.Controllers
                             ProductQuantity = cartItem.Quantity
                         };
 
+                        // Update the product quantity
+                        var product = ct.Products.FirstOrDefault(p => p.Id == cartItem.ProductId);
+                        if (product != null)
+                        {
+                            product.Quantity -= cartItem.Quantity;
+                        }
+
                         ct.ProductOrders.Add(productOrder);
                     }
 
@@ -201,6 +233,7 @@ namespace TrueWebPhone.Controllers
 
                 var invoiceDetails = new
                 {
+                    paymentMethod = paymentMethod,
                     CustomerName = customer.Name,
                     CustomerPhone = customer.Phone,
                     CustomerAddress = customer.Address,
@@ -222,18 +255,14 @@ namespace TrueWebPhone.Controllers
                     customerPhone,
                     cartItems,
                     invoiceDetails
-
                 });
-
-
-
-
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, errorMessage = "An error occurred while processing your request. Please try again later." });
             }
         }
+
 
 
 
@@ -274,5 +303,8 @@ namespace TrueWebPhone.Controllers
         public string PaymentMethod { get; set; }
 
     }
+
+   
+
 }
 

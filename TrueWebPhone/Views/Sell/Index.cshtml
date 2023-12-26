@@ -200,7 +200,7 @@
                     <div class="product-item" data-product-id="@product.Id">
                         <img src="~/uploads/@product.ImagePath" alt="@product.ProductName">
                         <p>@product.ProductName - $@product.RetailPrice.ToString("0.##")</p>
-                        <button class="add-to-cart-btn">Add to Cart</button>
+                        <button class="add-to-cart-btn" data-quantity="@product.Quantity">Add to Cart</button>
                     </div>
                 }
             </div>
@@ -306,47 +306,84 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://rawgit.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 <script src="https://unpkg.com/html2pdf.js"></script>
+
+<script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.js"></script>
+
+
 <script>
     function displayInvoiceModal(invoiceDetails) {
-        // Generate HTML for displaying invoice details
-        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
-            '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
-            '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
-            '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
-            '<h4>Order Details</h4>' +
-            '<table class="table">' +
-            '<thead>' +
-            '<tr>' +
-            '<th>Product Name</th>' +
-            '<th>Quantity</th>' +
-            '<th>Total Price</th>' +
-            '</tr>' +
-            '</thead>' +
-            '<tbody>';
+        try {
+            if (!invoiceDetails || !invoiceDetails.orderDetails) {
+                console.error('Invalid invoiceDetails format:', invoiceDetails);
+                return;
+            }
 
-        for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
-            var orderDetail = invoiceDetails.orderDetails[i];
-            invoiceHtml += '<tr>' +
-                '<td>' + orderDetail.productName + '</td>' +
-                '<td>' + orderDetail.quantity + '</td>' +
-                '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
-                '</tr>';
+            // Get the current date and time
+            var currentDate = new Date();
+            var formattedDate = currentDate.toLocaleString();
+
+            // Generate HTML for displaying invoice details
+            var invoiceHtml = '<p><strong>Invoice Date:</strong> ' + formattedDate + '</p>' +
+                '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
+                '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
+                '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
+                '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
+                '<h4>Order Details</h4>' +
+                '<table class="table">' +
+                '<thead>' +
+                '<tr>' +
+                '<th>Product Name</th>' +
+                '<th>Quantity</th>' +
+                '<th>Total Price</th>' +
+                '</tr>' +
+                '</thead>' +
+                '<tbody>';
+
+            var totalAmount = 0; // Variable to calculate the total amount
+
+            for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
+                var orderDetail = invoiceDetails.orderDetails[i];
+                totalAmount += orderDetail.totalPrice; // Accumulate the total amount
+                invoiceHtml += '<tr>' +
+                    '<td>' + orderDetail.productName + '</td>' +
+                    '<td>' + orderDetail.quantity + '</td>' +
+                    '<td>' + (typeof orderDetail.totalPrice === 'number' ? orderDetail.totalPrice.toFixed(2) : 'N/A') + '</td>' +
+                    '</tr>';
+            }
+
+            invoiceHtml += '</tbody></table>';
+
+            // Display total price and payment method
+            invoiceHtml += '<p><strong>Total Amount:</strong> $' + totalAmount.toFixed(2) + '</p>';
+            invoiceHtml += '<p><strong>Payment Method:</strong> ' + invoiceDetails.paymentMethod + '</p>';
+
+            invoiceHtml += '<button id="download-pdf-btn">Download as PDF</button>';
+
+            // Update modal content with invoice details
+            $("#invoiceModal").find(".modal-body").html(invoiceHtml);
+
+            // Show the modal
+            $("#invoiceModal").modal("show");
+
+            $("#download-pdf-btn").on("click", function () {
+                // Delay the download to ensure the content is ready
+                setTimeout(function () {
+                    renderContent().then(function () {
+                        downloadPDF(invoiceDetails);
+                    });
+                }, 1000);// You may need to adjust the delay based on your content rendering time
+            });
+        } catch (error) {
+            console.error('Error displaying invoice modal:', error);
         }
+    }
 
-        invoiceHtml += '</tbody></table>';
-
-        invoiceHtml += '<button id="download-pdf-btn">Download as PDF</button>';
-
-        // Update modal content with invoice details
-        $("#invoiceModal").find(".modal-body").html(invoiceHtml);
-
-        // Show the modal
-        $("#invoiceModal").modal("show");
-
-        $("#download-pdf-btn").on("click", function () {
-            downloadPDF(invoiceDetails);
+    function renderContent() {
+        return new Promise(function (resolve, reject) {
+           
+            resolve();
         });
-
     }
 
 
@@ -356,8 +393,13 @@
             return;
         }
 
+        // Get the current date and time
+        var currentDate = new Date();
+        var formattedDate = currentDate.toLocaleString();
+
         // Generate HTML for displaying invoice details
-        var invoiceHtml = '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
+        var invoiceHtml = '<p><strong>Invoice Date:</strong> ' + formattedDate + '</p>' +
+            '<p><strong>Customer Name:</strong> ' + invoiceDetails.customerName + '</p>' +
             '<p><strong>Customer Phone:</strong> ' + invoiceDetails.customerPhone + '</p>' +
             '<p><strong>Customer Address:</strong> ' + invoiceDetails.customerAddress + '</p>' +
             '<p><strong>Staff Name:</strong> ' + invoiceDetails.staffName + '</p>' +
@@ -372,34 +414,39 @@
             '</thead>' +
             '<tbody>';
 
+        var totalAmount = 0; // Variable to calculate the total amount
+
         for (var i = 0; i < invoiceDetails.orderDetails.length; i++) {
             var orderDetail = invoiceDetails.orderDetails[i];
+            totalAmount += orderDetail.totalPrice; // Accumulate the total amount
             invoiceHtml += '<tr>' +
                 '<td>' + orderDetail.productName + '</td>' +
                 '<td>' + orderDetail.quantity + '</td>' +
-                '<td>' + orderDetail.totalPrice.toFixed(2) + '</td>' +
+                '<td>' + (typeof orderDetail.totalPrice === 'number' ? orderDetail.totalPrice.toFixed(2) : 'N/A') + '</td>' +
                 '</tr>';
         }
 
         invoiceHtml += '</tbody></table>';
 
+        // Display total price and payment method
+        invoiceHtml += '<p><strong>Total Amount:</strong> $' + totalAmount.toFixed(2) + '</p>';
+        invoiceHtml += '<p><strong>Payment Method:</strong> ' + invoiceDetails.paymentMethod + '</p>';
+
         // Create a new HTML element with the invoice content
         var invoiceElement = document.createElement("div");
         invoiceElement.innerHTML = invoiceHtml;
 
-        // Use html2pdf to generate the PDF
+        console.log(invoiceElement);
+
+     
         html2pdf(invoiceElement, {
             margin: 10,
             filename: 'invoice.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
+            image: { type: 'pdf', quality: 0.98 },
             html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        });
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        })
     }
-
-
-
-
     $(document).ready(function () 
     {
 
@@ -439,30 +486,39 @@
             var productName = productInfo.replace(/\s*\-\s*\$[0-9,]+(\.[0-9]{1,2})?/, "");
             var productImage = $(this).siblings("img").attr("src");
             var productId = $(this).closest('.product-item').data('product-id');
+            var availableQuantity = parseInt($(this).data('quantity'));
+            // Check if the available quantity is greater than 0 before adding to the cart
+            if (availableQuantity > 0) {
+                availableQuantity = Math.max(availableQuantity - 1, 0);
+                $(this).data('quantity', availableQuantity);
+                $(this).text('Add to Cart (' + availableQuantity + ')');
+                var existingCartItem = $(".cart-item").filter(function () {
+                    return $(this).find('.product-name').text().includes(productName);
+                });
 
+                if (existingCartItem.length > 0) {
+                   
+                    var existingQuantity = parseInt(existingCartItem.find('.quantity').text());
+                    existingCartItem.find('.quantity').text(existingQuantity + 1);
+                } else {
+                    $("#cart-details").append(
+                        '<div class="cart-item">' +
+                        '<img src="' + productImage + '" alt="' + productName + '" style="width: 3cm; height: 2cm;">' +
+                        '<div>' +
+                        '<p class="product-name">' + productName + ' - $' + productPrice.toFixed(2) + '</p>' +
+                        '<p class="quantity">1</p>' +
+                        '<p class="product-id" hidden>' + productId + '</p>' +
+                        '</div>' +
+                        '<span class="delete-icon" onclick="removeCartItem(this)">&#128465;</span>' +
+                        '</div>'
+                    );
 
+                }
 
-            var existingCartItem = $(".cart-item").filter(function () {
-                return $(this).find('.product-name').text().includes(productName);
-            });
-
-            if (existingCartItem.length > 0) {
-                var existingQuantity = parseInt(existingCartItem.find('.quantity').text());
-                existingCartItem.find('.quantity').text(existingQuantity + 1);
+                updateCartTotals();
             } else {
-                $("#cart-details").append(
-                    '<div class="cart-item">' +
-                    '<img src="' + productImage + '" alt="' + productName + '" style="width: 3cm; height: 2cm;">' +
-                    '<div>' +
-                    '<p class="product-name">' + productName + ' - $' + productPrice.toFixed(2) + '</p>' +
-                    '<p class="quantity">1</p>' + 
-                    '<p class = "product-id" hidden>' + productId + '</p>' +
-                    '</div>' +
-                    '<span class="delete-icon" onclick="removeCartItem(this)">&#128465;</span>' +
-                    '</div>'
-                );
+                alert("Product is out of stock!");
             }
-            updateCartTotals();
         });
         $("#checkout-btn").on("click", function () {
             var cartItems = [];
@@ -491,7 +547,7 @@
             var customerPhone = $("#phone").val();
             var customerPayment = parseFloat($("#customer-payment").val()) || 0;
             createBill(cartItems, customerPayment, customerPhone);
-            d
+            
         });
         $("#addNewCustomer").click(function () {
             var phone = $("#phone").val();
@@ -520,7 +576,7 @@
         } else {
             $(element).closest(".cart-item").remove();
         }
-        // Update the total items and total price after removing an item
+        
         updateCartTotals();
     }
 
@@ -566,7 +622,7 @@
             success: function (response) {
                 console.log("Bill created successfully:", response);
                 if (response.success) {
-                    // Display the invoice modal
+                    
                     console.log("ok");
                     displayInvoiceModal(response.invoiceDetails);
                 }
